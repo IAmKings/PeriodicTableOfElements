@@ -1,0 +1,483 @@
+[
+  {
+    "url": "https://zh.wikipedia.org/wiki/铅",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%93%85 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Lead",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Lead (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))"
+  },
+  {
+    "symbol": "Pb",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/铋",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%93%8B (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Bismuth",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Bismuth (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Bi",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/钋",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%92%8B (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Polonium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Polonium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Po",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/砹",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E7%A0%B9 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Astatine",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Astatine (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "At",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/氡",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E6%B0%A1 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Radon",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Radon (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Rn",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/钫",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%92%AB (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Francium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Francium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Fr",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/镭",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%95%AD (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Radium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Radium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Ra",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/锕",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%94%95 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Actinium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Actinium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Ac",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/钍",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%92%8D (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Thorium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Thorium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Th",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/镤",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%95%A4 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Protactinium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Protactinium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Pa",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/铀",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%93%80 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Uranium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Uranium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "U",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/镎",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%95%8E (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Neptunium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Neptunium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Np",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/钚",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%92%9A (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Plutonium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Plutonium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Pu",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/镅",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%95%85 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Americium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Americium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Am",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/锔",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%94%94 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Curium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Curium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Cm",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/锫",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%94%AB (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Berkelium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Berkelium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Bk",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/锎",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%94%8E (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Californium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Californium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Cf",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/锿",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%94%BF (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Einsteinium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Einsteinium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Es",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/镄",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%95%84 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Fermium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Fermium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Fm",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/钔",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%92%94 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Mendelevium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Mendelevium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Md",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/锘",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%94%98 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Nobelium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Nobelium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "No",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/铹",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%93%B9 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Lawrencium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Lawrencium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Lr",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/𬬻",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%F0%AC%AC%BB (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Rutherfordium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Rutherfordium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Rf",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/𬭊",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%F0%AC%AD%8A (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Dubnium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Dubnium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Db",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/𬭳",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%F0%AC%AD%B3 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Seaborgium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Seaborgium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Sg",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/𬭛",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%F0%AC%AD%9B (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Bohrium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Bohrium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Bh",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/𬭶",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%F0%AC%AD%B6 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Hassium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Hassium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Hs",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/鿏",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%BF%8F (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Meitnerium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Meitnerium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Mt",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/𫟼",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%F0%AB%9F%BC (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Darmstadtium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Darmstadtium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Ds",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/𬬭",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%F0%AC%AC%AD (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Roentgenium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Roentgenium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Rg",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/鿔",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%BF%94 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Copernicium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Copernicium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Cn",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/鿭",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%BF%AD (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Nihonium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Nihonium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Nh",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/𫓧",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%F0%AB%93%A7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Flerovium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Flerovium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Fl",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/镆",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%95%86 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Moscovium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Moscovium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Mc",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/𫟷",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%F0%AB%9F%B7 (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Livermorium",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Livermorium (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Lv",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/鿬",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%BF%AC (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Tennessine",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Tennessine (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Ts",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  },
+  {
+    "url": "https://zh.wikipedia.org/wiki/鿫",
+    "error": "HTTPSConnectionPool(host='zh.wikipedia.org', port=443): Max retries exceeded with url: /wiki/%E9%BF%AB (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "url": "https://en.wikipedia.org/wiki/Oganesson",
+    "error": "HTTPSConnectionPool(host='en.wikipedia.org', port=443): Max retries exceeded with url: /wiki/Oganesson (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:997)')))"
+  },
+  {
+    "symbol": "Og",
+    "phase": "insert",
+    "error": "NOT NULL constraint failed: Elements_Master.Period"
+  }
+]

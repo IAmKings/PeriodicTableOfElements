@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS Elements_Master (
     Name_EN                 VARCHAR(20) NOT NULL,
     Ar                      REAL,
     MassNumber_MostStable   INTEGER,
-    Period                  INTEGER NOT NULL,
+    Period                  INTEGER,
     "Group"                 INTEGER,
     Group_Traditional       VARCHAR(5),
     Block                   CHAR(1) CHECK(Block IN ('s', 'p', 'd', 'f')),
@@ -36,30 +36,71 @@ CREATE TABLE IF NOT EXISTS Elements_Master (
 
 -- Periodic Properties Table: Periodic trends data
 CREATE TABLE IF NOT EXISTS Properties_Periodic (
-    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
-    Symbol                  VARCHAR(3) NOT NULL,
-    Z                       INTEGER NOT NULL,
-    CovalentRadius_pm       REAL,
-    MetallicRadius_pm       REAL,
-    VanderWaalsRadius_pm    REAL,
-    IE1_kJmol               REAL,
-    IE2_kJmol               REAL,
-    IE3_kJmol               REAL,
-    IE4_kJmol               REAL,
-    EA_kJmol                REAL,
-    Electronegativity_Pauling REAL,
-    Electronegativity_Mulliken REAL,
+    id                          INTEGER PRIMARY KEY AUTOINCREMENT,
+    Symbol                      VARCHAR(3) NOT NULL,
+    Z                           INTEGER NOT NULL,
+    CovalentRadius_pm           REAL,
+    MetallicRadius_pm            REAL,
+    VanderWaalsRadius_pm        REAL,
+    IE1_kJmol                   REAL,
+    IE2_kJmol                   REAL,
+    IE3_kJmol                   REAL,
+    IE4_kJmol                   REAL,
+    EA_kJmol                    REAL,
+    Electronegativity_Pauling   REAL,
+    Electronegativity_Mulliken  REAL,
     Electronegativity_AllredRochow REAL,
-    E0_Acidic_V             REAL,
-    E0_Basic_V              REAL,
-    LatimerDiagram          TEXT,
-    OxidationStates_Common  TEXT,
-    Data_Source             VARCHAR(50) DEFAULT 'Wikipedia/PubChem',
-    Data_Status             VARCHAR(20) DEFAULT 'Active',
-    Date_Collected          DATE DEFAULT (DATE('now')),
-    Notes                   TEXT,
+    E0_Acidic_V                 REAL,
+    E0_Basic_V                  REAL,
+    LatimerDiagram              TEXT,
+    OxidationStates_Common      TEXT,
+    -- PubChem quality overlay
+    PubChem_Ar                  REAL,
+    PubChem_EN                  REAL,
+    PubChem_IE1_kJmol           REAL,
+    Quality_Score               INTEGER DEFAULT 0 CHECK(Quality_Score BETWEEN 0 AND 3),
+    Data_Discrepancy            TEXT,
+    Data_Source                 VARCHAR(50) DEFAULT 'Wikipedia/PubChem',
+    Data_Status                 VARCHAR(20) DEFAULT 'Active',
+    Date_Collected              DATE DEFAULT (DATE('now')),
+    Notes                       TEXT,
     FOREIGN KEY (Symbol) REFERENCES Elements_Master(Symbol),
     FOREIGN KEY (Z) REFERENCES Elements_Master(Z),
+    UNIQUE(Symbol, Z)
+);
+
+-- PubChem raw data snapshot for offline UI comparison
+CREATE TABLE IF NOT EXISTS Properties_PubChem (
+    id                          INTEGER PRIMARY KEY AUTOINCREMENT,
+    Symbol                      VARCHAR(3) NOT NULL,
+    Z                           INTEGER NOT NULL,
+    -- Atomic weight
+    Ar_Exact                    REAL,
+    Ar_Uncertainty              REAL,
+    -- Radius
+    CovalentRadius_pm           REAL,
+    VanderWaalsRadius_pm        REAL,
+    -- Ionization energies (eV)
+    IE1_eV                      REAL,
+    IE2_eV                      REAL,
+    IE3_eV                      REAL,
+    IE4_eV                      REAL,
+    -- Electronegativity
+    EN_Pauling                  REAL,
+    EN_Mulliken                 REAL,
+    -- Electron affinity (eV)
+    EA_eV                       REAL,
+    -- Other
+    OxidationStates             TEXT,
+    Phase_STP                   VARCHAR(10),
+    Density_gcm3                REAL,
+    MeltingPoint_K              REAL,
+    BoilingPoint_K              REAL,
+    -- Electron configuration (with superscript preserved via Markup array)
+    ElectronConfig_Raw          VARCHAR(100),
+    ElectronConfig_Markup       TEXT,
+    -- Metadata
+    ScrapedAt                    DATE DEFAULT (DATE('now')),
     UNIQUE(Symbol, Z)
 );
 
@@ -69,3 +110,4 @@ CREATE INDEX IF NOT EXISTS idx_elements_group ON Elements_Master("Group");
 CREATE INDEX IF NOT EXISTS idx_elements_block ON Elements_Master(Block);
 CREATE INDEX IF NOT EXISTS idx_elements_category ON Elements_Master(Category);
 CREATE INDEX IF NOT EXISTS idx_properties_symbol ON Properties_Periodic(Symbol);
+CREATE INDEX IF NOT EXISTS idx_pubchem_symbol ON Properties_PubChem(Symbol);

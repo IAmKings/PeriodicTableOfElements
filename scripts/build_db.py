@@ -109,6 +109,13 @@ class PropertiesData:
     E0_Basic_V: Optional[float] = None
     OxidationStates_Common: Optional[str] = None
 
+    # PubChem quality overlay
+    PubChem_Ar: Optional[float] = None
+    PubChem_EN: Optional[float] = None
+    PubChem_IE1_kJmol: Optional[float] = None
+    Quality_Score: int = 0
+    Data_Discrepancy: Optional[str] = None
+
     Data_Source: str = "Wikipedia/PubChem"
     Date_Collected: str = field(default_factory=lambda: date.today().isoformat())
     Notes: Optional[str] = None
@@ -559,10 +566,63 @@ class WikipediaScraper:
 
 
 # ---------------------------------------------------------------------------
-# PubChem client
+# PubChem client (corrected endpoint: pug_view/data/element/{Z}/JSON)
 # ---------------------------------------------------------------------------
+
+# Superscript digit map for reconstructing electron config
+_SUP_MAP = {
+    "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴",
+    "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹",
+}
+
+
+def _reconstruct_superscripts(text: str, markup: List[Dict]) -> str:
+    """Reconstruct Unicode superscripts from PubChem Markup array."""
+    for m in sorted(markup, key=lambda x: -x["Start"]):  # reverse to not shift offsets
+        if m["Type"] == "Superscript":
+            char = text[m["Start"]: m["Start"] + m["Length"]]
+            # Length may include trailing chars (e.g. "4 "), only convert the first char
+            sup = _SUP_MAP.get(char[0], char[0])
+            text = text[: m["Start"]] + sup + text[m["Start"] + 1 :]
+    return text
+
+
+@dataclass
+class PubChemData:
+    """Parsed PubChem element data from pug_view/data/element/{Z}/JSON."""
+    Symbol: str
+    Z: int
+    Ar_Exact: Optional[float] = None
+    Ar_Uncertainty: Optional[float] = None
+    CovalentRadius_pm: Optional[float] = None
+    VanderWaalsRadius_pm: Optional[float] = None
+    IE1_eV: Optional[float] = None
+    IE2_eV: Optional[float] = None
+    IE3_eV: Optional[float] = None
+    IE4_eV: Optional[float] = None
+    EN_Pauling: Optional[float] = None
+    EN_Mulliken: Optional[float] = None
+    EA_eV: Optional[float] = None
+    OxidationStates: Optional[str] = None
+    Phase_STP: Optional[str] = None
+    Density_gcm3: Optional[float] = None
+    MeltingPoint_K: Optional[float] = None
+    BoilingPoint_K: Optional[float] = None
+    ElectronConfig_Raw: Optional[str] = None
+    ElectronConfig_Markup: Optional[str] = None
+    # Quality overlay
+    Quality_Score: int = 0
+    Data_Discrepancy: Optional[str] = None
+    # Original wiki values (for comparison)
+    wiki_Ar: Optional[float] = None
+    wiki_EN: Optional[float] = None
+    wiki_IE1: Optional[float] = None
+
+
 class PubChemClient:
-    """Lightweight PubChem PUG REST client for element data."""
+    """PubChem pug_view/data/element/{Z}/JSON client with quality scoring."""
+
+    _EV_TO_KJ = 96.485  # 1 eV = 96.485 kJ/mol
 
     def __init__(self, delay: float = REQUEST_DELAY):
         self.delay = delay
@@ -571,27 +631,177 @@ class PubChemClient:
             {"User-Agent": "PeriodicTableBot/1.0 (Educational Research)"}
         )
 
-    def get_properties(self, symbol: str) -> Dict[str, Any]:
-        """Fetch numeric properties for element by symbol."""
-        result: Dict[str, Any] = {}
-        # PubChem compound lookup by name often returns the element's
-        # most common compound; we treat it as best-effort supplementary data.
-        url = (
-            "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"
-            f"{symbol}/property/MolecularWeight,IsotopeAtomCount/JSON"
-        )
+    def get_data(self, z: int) -> Optional[PubChemData]:
+        """Fetch and parse PubChem pug_view element data by atomic number."""
+        url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/element/{z}/JSON"
         try:
             resp = self.session.get(url, timeout=20)
-            if resp.status_code == 200:
-                data = resp.json()
-                props = data.get("PropertyTable", {}).get("Properties", [{}])[0]
-                mw = props.get("MolecularWeight")
-                if mw:
-                    result["molecular_weight"] = float(mw)
-            time.sleep(self.delay)
+            if resp.status_code != 200:
+                logger.warning("[PubChem] HTTP %s for Z=%d", resp.status_code, z)
+                return None
+            d = resp.json()
         except (requests.RequestException, ValueError) as exc:
-            logger.warning("PubChem lookup failed for %s: %s", symbol, exc)
-        return result
+            logger.warning("[PubChem] Fetch failed Z=%d: %s", z, exc)
+            return None
+
+        # Walk Properties section
+        pub = PubChemData(Symbol="", Z=z)
+        for s in d["Record"]["Section"]:
+            if s["TOCHeading"] != "Properties":
+                continue
+            for sub in s.get("Section", []):
+                heading = sub["TOCHeading"]
+                infos = sub.get("Information", [])
+                if not infos:
+                    continue
+
+                self._parse_subfield(pub, heading, infos)
+
+        time.sleep(self.delay)
+        return pub
+
+    def _parse_subfield(self, pub: PubChemData, heading: str, infos: List[Dict]) -> None:
+        """Parse a single PubChem Properties subsection."""
+        val = infos[0].get("Value", {})
+
+        if heading == "Atomic Weight":
+            # Try "[55.845(2)]" format first
+            if "StringWithMarkup" in val:
+                raw = val["StringWithMarkup"][0]["String"]
+                pub.Ar_Exact = self._parse_ar(raw)
+            elif "Number" in val:
+                pub.Ar_Exact = float(val["Number"][0])
+
+        elif heading == "Electronegativity":
+            nums = []
+            for info in infos:
+                v = info.get("Value", {})
+                if "Number" in v:
+                    nums.extend(v["Number"])
+            if len(nums) >= 1:
+                pub.EN_Pauling = float(nums[0])
+            if len(nums) >= 2:
+                pub.EN_Mulliken = float(nums[1])
+
+        elif heading == "Ionization Energy":
+            if "StringWithMarkup" in val:
+                raw = val["StringWithMarkup"][0]["String"]
+                # "7.902 eV" or "7.9024681 ± 0.0000012 eV"
+                m = re.search(r"([\d.]+)\s*eV", raw)
+                if m:
+                    pub.IE1_eV = float(m.group(1))
+
+        elif heading == "Electron Affinity":
+            if "Number" in val:
+                pub.EA_eV = float(val["Number"][0])
+
+        elif heading == "Atomic Radius":
+            # Covalent radius: "132(3)[l.s.], 152(6)[h.s.] pm (Covalent)"
+            for info in infos:
+                v = info.get("Value", {})
+                if "Number" in v:
+                    pub.CovalentRadius_pm = float(v["Number"][0])
+                if "StringWithMarkup" in v:
+                    raw = v["StringWithMarkup"][0]["String"]
+                    if "Van der Waals" in raw:
+                        m = re.search(r"(\d+)\s*pm", raw)
+                        if m:
+                            pub.VanderWaalsRadius_pm = float(m.group(1))
+
+        elif heading == "Oxidation States":
+            if "StringWithMarkup" in val:
+                pub.OxidationStates = val["StringWithMarkup"][0]["String"]
+
+        elif heading == "Physical Description":
+            if "StringWithMarkup" in val:
+                raw = val["StringWithMarkup"][0]["String"].lower()
+                if "solid" in raw:
+                    pub.Phase_STP = "Solid"
+                elif "liquid" in raw:
+                    pub.Phase_STP = "Liquid"
+                elif "gas" in raw:
+                    pub.Phase_STP = "Gas"
+
+        elif heading == "Density":
+            if "StringWithMarkup" in val:
+                raw = val["StringWithMarkup"][0]["String"]
+                m = re.search(r"([\d.]+)\s*grams? per cubic", raw)
+                if m:
+                    pub.Density_gcm3 = float(m.group(1))
+
+        elif heading == "Melting Point":
+            if "StringWithMarkup" in val:
+                raw = val["StringWithMarkup"][0]["String"]
+                m = re.search(r"([\d.]+)\s*K", raw)
+                if m:
+                    pub.MeltingPoint_K = float(m.group(1))
+                else:
+                    m = re.search(r"([\d.]+)\s*K", raw)
+                    if not m:
+                        # Try Celsius
+                        m2 = re.search(r"([\d.]+)\s*[°]C", raw)
+                        if m2:
+                            pub.MeltingPoint_K = float(m2.group(1)) + 273.15
+
+        elif heading == "Boiling Point":
+            if "StringWithMarkup" in val:
+                raw = val["StringWithMarkup"][0]["String"]
+                m = re.search(r"([\d.]+)\s*K", raw)
+                if m:
+                    pub.BoilingPoint_K = float(m.group(1))
+
+        elif heading == "Electron Configuration":
+            if "StringWithMarkup" in val:
+                swm = val["StringWithMarkup"][0]
+                pub.ElectronConfig_Raw = swm["String"]
+                # Reconstruct superscripts from Markup array
+                pub.ElectronConfig_Markup = _reconstruct_superscripts(
+                    swm["String"], swm.get("Markup", [])
+                )
+
+    @staticmethod
+    def _parse_ar(raw: str) -> Optional[float]:
+        """Parse atomic weight from '55.845(2)' or '[55.845, 55.999]' format."""
+        # Remove brackets and uncertainty
+        raw = raw.strip("[]()")
+        m = re.search(r"([\d.]+)", raw)
+        return float(m.group(1)) if m else None
+
+    # ---- Quality scoring ---------------------------------------------------
+
+    def score(self, pub: PubChemData) -> PubChemData:
+        """Compare PubChem vs Wikipedia values, set Quality_Score and Data_Discrepancy."""
+        score = 0
+        discrepancies = []
+
+        # Ar: tolerance ±0.001
+        if pub.wiki_Ar is not None and pub.Ar_Exact is not None:
+            diff = abs(pub.wiki_Ar - pub.Ar_Exact)
+            if diff <= 0.001:
+                score += 1
+            else:
+                discrepancies.append(f"Ar:{diff:+.6f}")
+
+        # EN (Pauling): tolerance ±0.1
+        if pub.wiki_EN is not None and pub.EN_Pauling is not None:
+            diff = abs(pub.wiki_EN - pub.EN_Pauling)
+            if diff <= 0.1:
+                score += 1
+            else:
+                discrepancies.append(f"EN:{diff:+.2f}")
+
+        # IE1: tolerance ±10 kJ/mol (eV × 96.485)
+        if pub.wiki_IE1 is not None and pub.IE1_eV is not None:
+            pub_ie1_kj = pub.IE1_eV * self._EV_TO_KJ
+            diff = abs(pub.wiki_IE1 - pub_ie1_kj)
+            if diff <= 10:
+                score += 1
+            else:
+                discrepancies.append(f"IE1:{diff:+.1f}")
+
+        pub.Quality_Score = score
+        pub.Data_Discrepancy = "|".join(discrepancies) if discrepancies else None
+        return pub
 
 
 # ---------------------------------------------------------------------------
@@ -635,6 +845,8 @@ class Database:
             "IE4_kJmol", "EA_kJmol", "Electronegativity_Pauling",
             "Electronegativity_Mulliken", "Electronegativity_AllredRochow",
             "E0_Acidic_V", "E0_Basic_V", "OxidationStates_Common",
+            "PubChem_Ar", "PubChem_EN", "PubChem_IE1_kJmol",
+            "Quality_Score", "Data_Discrepancy",
             "Data_Source", "Date_Collected", "Notes",
         ]
         placeholders = ", ".join("?" * len(fields))
@@ -643,10 +855,34 @@ class Database:
         values = [getattr(data, f) for f in fields]
         self.conn.execute(sql, values)
 
+    def insert_pubchem(self, pub: PubChemData) -> None:
+        """Insert PubChem raw data into Properties_PubChem."""
+        fields = [
+            "Symbol", "Z", "Ar_Exact", "Ar_Uncertainty",
+            "CovalentRadius_pm", "VanderWaalsRadius_pm",
+            "IE1_eV", "IE2_eV", "IE3_eV", "IE4_eV",
+            "EN_Pauling", "EN_Mulliken",
+            "EA_eV", "OxidationStates", "Phase_STP",
+            "Density_gcm3", "MeltingPoint_K", "BoilingPoint_K",
+            "ElectronConfig_Raw", "ElectronConfig_Markup",
+        ]
+        placeholders = ", ".join("?" * len(fields))
+        quoted_fields = ', '.join(f'"{f}"' for f in fields)
+        sql = f"INSERT INTO Properties_PubChem ({quoted_fields}) VALUES ({placeholders})"
+        values = [getattr(pub, f) for f in fields]
+        self.conn.execute(sql, values)
+
     def element_exists(self, symbol: str) -> bool:
         """Check whether an element record already exists in the database."""
         cur = self.conn.execute(
             "SELECT 1 FROM Elements_Master WHERE Symbol = ?", (symbol,)
+        )
+        return cur.fetchone() is not None
+
+    def pubchem_exists(self, symbol: str) -> bool:
+        """Check whether a PubChem record already exists."""
+        cur = self.conn.execute(
+            "SELECT 1 FROM Properties_PubChem WHERE Symbol = ?", (symbol,)
         )
         return cur.fetchone() is not None
 
@@ -825,30 +1061,57 @@ def main() -> None:
         logger.info("=" * 50)
         logger.info("[%d/%d] Processing %s (Z=%d)...", idx, total, symbol, z)
 
-        # Skip if already inserted
+        # 1) Fetch PubChem first (needs no DB state, can run independently)
+        pub = None
+        if not db.pubchem_exists(symbol):
+            pub = pubchem.get_data(z)
+            if pub:
+                pub.Symbol = symbol  # set Symbol before insert
+
+        # 2) Skip entirely if element already in DB
         if db.element_exists(symbol):
             logger.info("  Already exists, skipping.")
             continue
 
-        # 1) Chinese Wikipedia
+        # 3) Chinese Wikipedia
         elem, props = wiki.fetch_zh(name_cn, symbol, z)
 
-        # 2) English Wikipedia (merge)
+        # 4) English Wikipedia (merge)
         elem, props = wiki.fetch_en(name_en, elem, props)
 
-        # 3) PubChem (supplementary)
-        pc_data = pubchem.get_properties(symbol)
-        if pc_data.get("molecular_weight") and elem.Ar is None:
-            elem.Ar = pc_data["molecular_weight"]
+        # 5) Score PubChem against Wikipedia and populate fields
+        if pub:
+            pub.wiki_Ar = elem.Ar
+            pub.wiki_EN = props.Electronegativity_Pauling
+            pub.wiki_IE1 = props.IE1_kJmol
+            pub = pubchem.score(pub)
 
-        # 4) Post-process derived fields
+            # Write PubChem raw snapshot
+            db.insert_pubchem(pub)
+
+            # Fill EA and EN_Mulliken from PubChem
+            if props.EA_kJmol is None and pub.EA_eV is not None:
+                props.EA_kJmol = round(pub.EA_eV * PubChemClient._EV_TO_KJ, 3)
+            if props.Electronegativity_Mulliken is None and pub.EN_Mulliken is not None:
+                props.Electronegativity_Mulliken = pub.EN_Mulliken
+
+            # Quality overlay
+            props.PubChem_Ar = pub.Ar_Exact
+            props.PubChem_EN = pub.EN_Pauling
+            props.PubChem_IE1_kJmol = (
+                round(pub.IE1_eV * PubChemClient._EV_TO_KJ, 1) if pub.IE1_eV else None
+            )
+            props.Quality_Score = pub.Quality_Score
+            props.Data_Discrepancy = pub.Data_Discrepancy
+
+        # 6) Post-process derived fields
         derive_subcategory(elem)
         derive_group_traditional(elem)
         derive_valence_electrons(elem)
         derive_unpaired_electrons(elem)
         set_exam_defaults(elem)
 
-        # 5) Insert into DB
+        # 7) Insert into DB
         try:
             db.insert_element(elem)
             db.insert_properties(props)
