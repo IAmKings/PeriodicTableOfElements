@@ -80,6 +80,7 @@ class ElementData:
     Data_Source: str = "Wikipedia"
     Data_Status: str = "Active"
     Date_Collected: str = field(default_factory=lambda: date.today().isoformat())
+    Data_Version: str = "1.0.0"
     Notes: Optional[str] = None
 
 
@@ -616,7 +617,7 @@ class Database:
             "ElectronConfig_Full", "ElectronConfig_Simplified", "ValenceElectrons",
             "UnpairedElectrons", "Phase_STP", "CrystalStructure", "MeltingPoint_K",
             "BoilingPoint_K", "Density_gcm3", "ExamFrequency", "KeyExamPoints",
-            "Data_Source", "Data_Status", "Date_Collected", "Notes",
+            "Data_Source", "Data_Status", "Date_Collected", "Data_Version", "Notes",
         ]
         placeholders = ", ".join("?" * len(fields))
         quoted_fields = ', '.join(f'"{f}"' for f in fields)
@@ -668,7 +669,10 @@ def derive_subcategory(elem: ElementData) -> None:
     block = elem.Block
     group = elem.Group
 
-    if "alkali" in cat or (block == "s" and group == 1 and elem.Z > 1):
+    # H is special: s-block but NOT an alkali metal — it's a reactive nonmetal
+    if elem.Symbol == "H":
+        elem.Subcategory = "Reactive Nonmetal"
+    elif "alkali" in cat or (block == "s" and group == 1 and elem.Z > 1):
         elem.Subcategory = "Alkali Metal"
     elif "alkaline" in cat or (block == "s" and group == 2):
         elem.Subcategory = "Alkaline Earth Metal"
@@ -687,7 +691,7 @@ def derive_subcategory(elem: ElementData) -> None:
     elif "noble gas" in cat or (block == "p" and group == 18):
         elem.Subcategory = "Noble Gas"
     elif "nonmetal" in cat:
-        if elem.Symbol in ("H", "N", "O", "P", "S", "Se"):
+        if elem.Symbol in ("N", "O", "P", "S", "Se"):
             elem.Subcategory = "Reactive Nonmetal"
         elif elem.Symbol == "C":
             elem.Subcategory = "Polyatomic Nonmetal"
@@ -746,15 +750,50 @@ def derive_unpaired_electrons(elem: ElementData) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Exam frequency defaults (high-value elements for exams)
+# ---------------------------------------------------------------------------
+
+# Element symbols that appear frequently in exam questions
+_EXAM_HIGH = {
+    "H", "He", "C", "N", "O", "F", "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar",
+    "K", "Ca", "Fe", "Cu", "Zn", "Br", "Ag", "I", "Au", "Pb",
+}
+_EXAM_MEDIUM = {
+    "Li", "Be", "B", "Ge", "As", "Se", "Kr", "Rb", "Sr", "Y", "Zr", "Nb", "Mo", "Tc",
+    "Ru", "Rh", "Pd", "Cd", "Sn", "Sb", "Te", "Xe", "Cs", "Ba", "La", "Ce", "Gd",
+    "Hg", "Tl", "Bi", "Po", "Rn", "Fr", "Ra", "Th", "U", "Mn", "Co", "Ni",
+}
+
+
+def set_exam_defaults(elem: ElementData) -> None:
+    """Set ExamFrequency and KeyExamPoints defaults if not already set."""
+    if elem.ExamFrequency is None:
+        if elem.Symbol in _EXAM_HIGH:
+            elem.ExamFrequency = "High"
+        elif elem.Symbol in _EXAM_MEDIUM:
+            elem.ExamFrequency = "Medium"
+        else:
+            elem.ExamFrequency = "Low"
+
+    if elem.KeyExamPoints is None:
+        # Build minimal placeholder from available data
+        pts = []
+        if elem.Subcategory:
+            pts.append(elem.Subcategory)
+        if elem.ElectronConfig_Simplified:
+            pts.append(f"电子构型:{elem.ElectronConfig_Simplified}")
+        elem.KeyExamPoints = "; ".join(pts) if pts else "周期表基础"
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
 def main() -> None:
     """Entry point: build the periodic table database from scratch."""
-    # Remove old DB for clean build
+    # Idempotent: don't delete existing DB — re-runs merge/upsert cleanly
     if DB_PATH.exists():
-        DB_PATH.unlink()
-        logger.info("Removed old database.")
+        logger.info("Using existing database at %s (will skip existing elements).", DB_PATH)
 
     # Load element list
     with open(ELEMENT_LIST_PATH, encoding="utf-8") as f:
@@ -801,6 +840,7 @@ def main() -> None:
         derive_group_traditional(elem)
         derive_valence_electrons(elem)
         derive_unpaired_electrons(elem)
+        set_exam_defaults(elem)
 
         # 5) Insert into DB
         try:
