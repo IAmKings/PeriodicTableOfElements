@@ -3,3 +3,7 @@
 .opencode/
 .trellis/
 AGENTS.md
+
+# Python 缓存
+__pycache__/
+*.pyc
