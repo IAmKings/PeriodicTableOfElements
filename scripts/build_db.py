@@ -157,6 +157,8 @@ class WikipediaScraper:
         text = re.sub(r"\[\d+\]", "", text)
         text = re.sub(r"\[note\s*\d+\]", "", text)
         text = re.sub(r"\[.*?\]", "", text)
+        # strip trailing Chinese noise like "2, 6 氧的电子层（2, 6）"
+        text = re.sub(r"[\d,\s]+[\u4e00-\u9fff].*$", "", text)
         return text.strip() or None
 
     @staticmethod
@@ -682,21 +684,25 @@ def derive_subcategory(elem: ElementData) -> None:
         elem.Subcategory = "Lanthanide"
     elif "actinide" in cat or (block == "f" and elem.Z > 71):
         elem.Subcategory = "Actinide"
-    elif "post-transition" in cat or (block == "p" and group in (13, 14)):
-        elem.Subcategory = "Post-transition Metal"
     elif "metalloid" in cat:
         elem.Subcategory = "Metalloid"
-    elif "halogen" in cat or (block == "p" and group == 17):
-        elem.Subcategory = "Halogen"
     elif "noble gas" in cat or (block == "p" and group == 18):
         elem.Subcategory = "Noble Gas"
     elif "nonmetal" in cat:
-        if elem.Symbol in ("N", "O", "P", "S", "Se"):
-            elem.Subcategory = "Reactive Nonmetal"
-        elif elem.Symbol == "C":
+        if elem.Symbol == "C":
             elem.Subcategory = "Polyatomic Nonmetal"
         else:
-            elem.Subcategory = "Nonmetal"
+            elem.Subcategory = "Reactive Nonmetal"
+    elif block == "p":
+        # p-block: classify by group — includes halogens, reactive nonmetals, post-transition
+        if group == 17:
+            elem.Subcategory = "Halogen"
+        elif group in (15, 16):
+            elem.Subcategory = "Reactive Nonmetal"
+        elif group in (13, 14):
+            elem.Subcategory = "Post-transition Metal"
+        else:
+            elem.Subcategory = "Other Metal"
     elif group == 18:
         elem.Subcategory = "Noble Gas"
     else:
