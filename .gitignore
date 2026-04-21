@@ -2,7 +2,11 @@
 .claude/
 .opencode/
 .trellis/
+.playwright-mcp/
 AGENTS.md
+
+# 下载的 PubChem 数据
+data/
 
 # Python 缓存
 __pycache__/
