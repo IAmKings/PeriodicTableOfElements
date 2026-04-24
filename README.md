@@ -1,21 +1,51 @@
-# 元素周期表 SQLite 数据库
+# 🧪 元素周期表 | Periodic Table of Elements
 
-基于维基百科（中文/英文）和 PubChem PUG REST API 抓取的 118 种化学元素数据，生成 SQLite 关系型数据库，并实现 PubChem 交叉验证质量评分系统。
+完整的元素周期表项目，包含：
+- **数据层**：Python 爬虫抓取维基百科 + PubChem 数据，生成 SQLite 数据库
+- **应用层**：Next.js 16 现代化交互式 Web 应用
 
 ---
 
-## 项目结构
+## 📦 项目结构
 
 ```
 .
-├── periodic_table.db              # 生成的 SQLite 数据库（3 表，118 元素）
-├── periodic_table_of_elements_sqlite_design.md  # 数据库设计文档
-├── scripts/
+├── periodic_table.db              # SQLite 数据库（3 表，118 元素完整数据）
+├── scripts/                       # 数据抓取脚本（Python）
 │   ├── build_db.py                # 主抓取脚本（幂等运行）
-│   ├── schema.sql                 # 数据库表结构定义
-│   ├── element_list.json          # 118 元素基础清单（Z, Symbol, Name_CN, Name_EN）
+│   ├── schema.sql                 # 数据库表结构
+│   ├── element_list.json          # 118 元素基础清单
 │   └── requirements.txt           # Python 依赖
+├── web/                           # 前端 Web 应用
+│   ├── app/                       # Next.js App Router
+│   ├── components/                # React 组件
+│   │   ├── periodic-table/        # 周期表核心组件
+│   │   └── ui/                    # shadcn/ui 组件库
+│   ├── lib/elements-data.ts       # 118 元素前端数据
+│   └── README.md                  # 前端详细文档
+├── periodic_table_of_elements_sqlite_design.md
 └── README.md                      # 本文件
+```
+
+---
+
+## 🚀 快速开始
+
+### 前端 Web 应用
+```bash
+cd web
+pnpm install
+pnpm dev
+```
+访问 `http://localhost:3000`
+
+详细说明请查看 **[web/README.md](./web/README.md)**
+
+### 数据抓取脚本
+```bash
+cd scripts
+pip install -r requirements.txt
+python3 build_db.py
 ```
 
 ---
