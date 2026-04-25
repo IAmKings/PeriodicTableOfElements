@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.periodictable.android.androidApp-mergeDebugResources-43:/values-v30/values-v30.xml",
+            "map": [
+                {
+                    "source": "/Users/pauldeman/.gradle/caches/9.0.0/transforms/9288111ff2c3171e97b8c28b16f1ec6a/transformed/material3-release/res/values-v30/values-v30.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "72",
+                        "endOffsets": "123"
+                    }
+                }
+            ]
+        }
+    ]
+}
