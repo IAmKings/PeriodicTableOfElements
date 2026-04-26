@@ -3,7 +3,9 @@
 .opencode/
 .trellis/
 .playwright-mcp/
+.agents/
 AGENTS.md
+skills-lock.json
 
 # 下载的 PubChem 数据
 data/
@@ -11,3 +13,37 @@ data/
 # Python 缓存
 __pycache__/
 *.pyc
+
+# macOS 系统文件
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Gradle 缓存和构建产物
+.gradle/
+build/
+!/**/src/**/build/
+
+# Android 构建产物
+mobile/androidApp/build/
+mobile/androidApp/release/
+mobile/androidApp/debug/
+*.apk
+*.ap_
+*.aab
+*.dex
+
+# IDE 配置
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# Log 文件
+*.log
+
+# 临时文件
+*.tmp
+*.temp
