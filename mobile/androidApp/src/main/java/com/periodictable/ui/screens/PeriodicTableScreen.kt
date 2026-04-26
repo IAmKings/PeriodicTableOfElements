@@ -38,7 +38,7 @@ import com.periodictable.data.Element
 import com.periodictable.data.ElementCategory
 import com.periodictable.ui.components.ElementDetail
 import com.periodictable.ui.components.PeriodicGrid
-import com.periodictable.ui.theme.Background
+import com.periodictable.ui.theme.AnimatedBackground
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,22 +50,9 @@ fun PeriodicTableScreen(
     var selectedCategories by remember { mutableStateOf<Set<ElementCategory>>(emptySet()) }
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Background)
+        modifier = modifier.fillMaxSize()
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            Color(0xFF06B6D4).copy(alpha = 0.1f),
-                            Color.Transparent
-                        )
-                    )
-                )
-        )
+        AnimatedBackground()
 
         Column {
             Surface(

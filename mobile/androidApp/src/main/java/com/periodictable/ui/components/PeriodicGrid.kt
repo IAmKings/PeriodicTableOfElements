@@ -26,9 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.periodictable.data.Element
 import com.periodictable.data.ElementCategory
-import com.periodictable.data.categoryInfo
 import com.periodictable.data.elements
-import com.periodictable.data.getElementPosition
 
 @Composable
 fun PeriodicGrid(
@@ -38,44 +36,50 @@ fun PeriodicGrid(
     onCategoriesChange: (Set<ElementCategory>) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val mainElements = elements.filter { 
-        it.category != ElementCategory.LANTHANIDE && it.category != ElementCategory.ACTINIDE 
-    }
-    val lanthanides = elements.filter { it.category == ElementCategory.LANTHANIDE }
-    val actinides = elements.filter { it.category == ElementCategory.ACTINIDE }
-
-    val grid = Array(10) { Array<Element?>(18) { null } }
-    
-    mainElements.forEach { element ->
-        val pos = getElementPosition(element)
-        if (pos != null && pos.first < 7) {
-            grid[pos.first][pos.second] = element
-        }
-    }
-
-    lanthanides.forEachIndexed { index, element ->
-        grid[7][3 + index] = element
-    }
-    
-    actinides.forEachIndexed { index, element ->
-        grid[8][3 + index] = element
-    }
-
     fun isElementHighlighted(element: Element): Boolean {
-        if (selectedCategories.isNotEmpty() && !selectedCategories.contains(element.category)) {
+        if (selectedCategories.isNotEmpty() && element.category !in selectedCategories) {
             return false
         }
         if (searchQuery.isNotEmpty()) {
             val q = searchQuery.lowercase()
             return element.symbol.lowercase().contains(q) ||
-                   element.nameEn.lowercase().contains(q) ||
-                   element.nameZh.contains(q) ||
-                   element.atomicNumber.toString() == q
+                    element.nameZh.contains(q) ||
+                    element.atomicNumber.toString() == q
         }
         return true
     }
 
-    Column(modifier = modifier) {
+    val mainElements = elements.filter {
+        it.category != ElementCategory.LANTHANIDE &&
+        it.category != ElementCategory.ACTINIDE
+    }
+
+    val gridRows = 9
+    val gridCols = 18
+    val grid: List<MutableList<Element?>> = List(gridRows) { MutableList<Element?>(gridCols) { null } }
+
+    mainElements.forEach { element ->
+        val row = element.period - 1
+        val col = element.group?.minus(1)
+        if (col != null && row < 7) {
+            grid[row][col] = element
+        }
+    }
+
+    // 放置镧系和锕系元素
+    elements.filter { it.category == ElementCategory.LANTHANIDE }.forEachIndexed { index, element ->
+        if (3 + index < gridCols) {
+            grid[7][3 + index] = element
+        }
+    }
+    elements.filter { it.category == ElementCategory.ACTINIDE }.forEachIndexed { index, element ->
+        if (3 + index < gridCols) {
+            grid[8][3 + index] = element
+        }
+    }
+
+    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
+        // 族号头
         Row(
             modifier = Modifier
                 .horizontalScroll(rememberScrollState())
@@ -95,68 +99,64 @@ fun PeriodicGrid(
             }
         }
 
-        Column(
-            modifier = Modifier.verticalScroll(rememberScrollState())
-        ) {
-            for (row in 0..6) {
-                Row(modifier = Modifier.padding(vertical = 1.dp)) {
-                    Box(
-                        modifier = Modifier.size(24.dp, 48.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = (row + 1).toString(),
-                            color = Color.White.copy(alpha = 0.4f),
-                            fontSize = 10.sp
-                        )
-                    }
-                    for (col in 0..17) {
-                        val element = grid[row][col]
-                        if (element != null) {
-                            ElementCard(
-                                element = element,
-                                isHighlighted = isElementHighlighted(element),
-                                onClick = onElementClick
-                            )
-                        } else {
-                            Spacer(modifier = Modifier.size(48.dp))
-                        }
-                    }
+        // 主表
+        for (row in 0..6) {
+            Row(modifier = Modifier.padding(vertical = 1.dp)) {
+                Box(
+                    modifier = Modifier.size(24.dp, 48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = (row + 1).toString(),
+                        color = Color.White.copy(alpha = 0.4f),
+                        fontSize = 10.sp
+                    )
                 }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            for (row in 7..8) {
-                Row(modifier = Modifier.padding(vertical = 1.dp)) {
-                    Box(
-                        modifier = Modifier.size(24.dp, 48.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = if (row == 7) "*" else "**",
-                            color = Color.White.copy(alpha = 0.4f),
-                            fontSize = 10.sp
+                for (col in 0..17) {
+                    val element = grid[row][col]
+                    if (element != null) {
+                        ElementCard(
+                            element = element,
+                            isHighlighted = isElementHighlighted(element),
+                            onClick = onElementClick
                         )
-                    }
-                    Spacer(modifier = Modifier.size(48.dp * 3))
-                    for (col in 3..17) {
-                        val element = grid[row][col]
-                        if (element != null) {
-                            ElementCard(
-                                element = element,
-                                isHighlighted = isElementHighlighted(element),
-                                onClick = onElementClick
-                            )
-                        } else {
-                            Spacer(modifier = Modifier.size(48.dp))
-                        }
+                    } else {
+                        Spacer(modifier = Modifier.size(48.dp))
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 镧系和锕系
+        for (row in 7..8) {
+            Row(modifier = Modifier.padding(vertical = 1.dp)) {
+                Box(
+                    modifier = Modifier.size(24.dp, 48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (row == 7) "*" else "**",
+                        color = Color.White.copy(alpha = 0.4f),
+                        fontSize = 10.sp
+                    )
+                }
+                Spacer(modifier = Modifier.size(48.dp * 3))
+                for (col in 3..17) {
+                    val element = grid[row][col]
+                    if (element != null) {
+                        ElementCard(
+                            element = element,
+                            isHighlighted = isElementHighlighted(element),
+                            onClick = onElementClick
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.size(48.dp))
+                    }
+                }
+            }
+        }
 
         CategoryLegend(
             selectedCategories = selectedCategories,
@@ -171,6 +171,19 @@ fun CategoryLegend(
     onCategoriesChange: (Set<ElementCategory>) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val categoryColors = mapOf(
+        ElementCategory.ALKALI_METAL to Pair(Color(0xFFEF4444), "碱金属"),
+        ElementCategory.ALKALINE_EARTH_METAL to Pair(Color(0xFFF97316), "碱土金属"),
+        ElementCategory.TRANSITION_METAL to Pair(Color(0xFFEAB308), "过渡金属"),
+        ElementCategory.POST_TRANSITION_METAL to Pair(Color(0xFF22C55E), "后过渡金属"),
+        ElementCategory.METALLOID to Pair(Color(0xFF14B8A6), "准金属"),
+        ElementCategory.NONMETAL to Pair(Color(0xFF06B6D4), "非金属"),
+        ElementCategory.HALOGEN to Pair(Color(0xFF3B82F6), "卤素"),
+        ElementCategory.NOBLE_GAS to Pair(Color(0xFF6366F1), "惰性气体"),
+        ElementCategory.LANTHANIDE to Pair(Color(0xFFEC4899), "镧系元素"),
+        ElementCategory.ACTINIDE to Pair(Color(0xFFF43F5E), "锕系元素")
+    )
+
     Column(modifier = modifier.padding(horizontal = 16.dp)) {
         Text(
             text = "元素分类",
@@ -178,31 +191,31 @@ fun CategoryLegend(
             fontSize = 12.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         val categories = ElementCategory.values().toList()
         val rows = categories.chunked(2)
-        
+
         rows.forEach { rowCategories ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 rowCategories.forEach { category ->
-                    val categoryData = categoryInfo[category]!!
+                    val (color, nameZh) = categoryColors.getValue(category)
                     val isSelected = selectedCategories.contains(category)
-                    
+
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .height(32.dp)
                             .clip(RoundedCornerShape(16.dp))
                             .background(
-                                if (isSelected) categoryData.color.copy(alpha = 0.3f)
+                                if (isSelected) color.copy(alpha = 0.3f)
                                 else Color.White.copy(alpha = 0.05f)
                             )
                             .border(
                                 width = 1.dp,
-                                color = if (isSelected) categoryData.color else Color.White.copy(alpha = 0.1f),
+                                color = if (isSelected) color else Color.White.copy(alpha = 0.1f),
                                 shape = RoundedCornerShape(16.dp)
                             )
                             .clickable {
@@ -221,19 +234,21 @@ fun CategoryLegend(
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Box(
-                                modifier = Modifier.size(8.dp)
+                                modifier = Modifier
+                                    .size(8.dp)
                                     .clip(RoundedCornerShape(2.dp))
-                                    .background(categoryData.color)
+                                    .background(color)
                             )
                             Text(
-                                text = categoryData.nameZh,
-                                color = if (isSelected) Color.White else Color.White.copy(alpha = 0.7f),
+                                text = nameZh,
+                                color = if (isSelected) Color.White
+                                else Color.White.copy(alpha = 0.7f),
                                 fontSize = 10.sp
                             )
                         }
                     }
                 }
-                
+
                 if (rowCategories.size == 1) {
                     Spacer(modifier = Modifier.weight(1f))
                 }

@@ -133,7 +133,7 @@ fun ElementDetail(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
                     text = element.description,
@@ -141,6 +141,28 @@ fun ElementDetail(
                     fontSize = 14.sp,
                     lineHeight = 20.sp
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 电子壳层可视化
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .padding(16.dp)
+                ) {
+                    Column {
+                        Text(
+                            text = "电子壳层分布",
+                            color = Color.White.copy(alpha = 0.8f),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        ElectronShell(element = element)
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
