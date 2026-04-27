@@ -15,8 +15,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -57,7 +61,41 @@ fun AnimatedBackground(
         label = "alpha3"
     )
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .drawWithCache {
+                val gridSize = 50.dp.toPx()
+                val gridColor = Color.White.copy(alpha = 0.02f)
+                onDrawWithContent {
+                    drawContent()
+                    
+                    // 绘制水平网格线
+                    var y = 0f
+                    while (y < size.height) {
+                        drawLine(
+                            color = gridColor,
+                            start = Offset(0f, y),
+                            end = Offset(size.width, y),
+                            strokeWidth = 1f
+                        )
+                        y += gridSize
+                    }
+                    
+                    // 绘制垂直网格线
+                    var x = 0f
+                    while (x < size.width) {
+                        drawLine(
+                            color = gridColor,
+                            start = Offset(x, 0f),
+                            end = Offset(x, size.height),
+                            strokeWidth = 1f
+                        )
+                        x += gridSize
+                    }
+                }
+            }
+    ) {
         // 背景底色
         Box(
             modifier = Modifier
@@ -68,8 +106,8 @@ fun AnimatedBackground(
         // 光晕1 - 左上角
         Box(
             modifier = Modifier
-                .size(200.dp)
-                .offset(x = (-40).dp, y = (-40).dp)
+                .size(240.dp)
+                .offset(x = (-80).dp, y = (-80).dp)
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(
@@ -84,8 +122,8 @@ fun AnimatedBackground(
         // 光晕2 - 右下角
         Box(
             modifier = Modifier
-                .size(200.dp)
-                .offset(x = 200.dp, y = 300.dp)
+                .size(280.dp)
+                .offset(x = 180.dp, y = 400.dp)
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(
@@ -97,11 +135,11 @@ fun AnimatedBackground(
                 )
         )
 
-        // 光晕3 - 右上角
+        // 光晕3 - 中间偏右上
         Box(
             modifier = Modifier
-                .size(180.dp)
-                .offset(x = 180.dp, y = (-20).dp)
+                .size(220.dp)
+                .offset(x = 200.dp, y = 20.dp)
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(

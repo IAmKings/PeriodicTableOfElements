@@ -1,17 +1,13 @@
 package com.periodictable.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -28,7 +24,6 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,25 +49,30 @@ fun ElementCard(
         label = "card-scale"
     )
 
+    // 透明度动画
+    val alpha by animateFloatAsState(
+        targetValue = if (isHighlighted) 1f else 0.2f,
+        animationSpec = tween(durationMillis = 300),
+        label = "card-alpha"
+    )
+
     // 发光强度动画
     val glowAlpha by animateFloatAsState(
-        targetValue = if (isPressed) 0.6f else 0f,
+        targetValue = if (isPressed && isHighlighted) 0.6f else 0f,
         animationSpec = tween(durationMillis = 200),
         label = "glow-alpha"
     )
 
     Box(
-        modifier = modifier.size(cellSize.dp)
+        modifier = modifier
+            .size(cellSize.dp)
+            .scale(scale)
     ) {
         // 发光背景
-        AnimatedVisibility(
-            visible = isPressed,
-            enter = scaleIn(animationSpec = tween(200)),
-            exit = scaleOut(animationSpec = tween(200))
-        ) {
+        if (isPressed && isHighlighted) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .size(cellSize.dp)
                     .blur(
                         radiusX = 12.dp,
                         radiusY = 12.dp,
@@ -85,29 +85,30 @@ fun ElementCard(
         Box(
             modifier = Modifier
                 .size(cellSize.dp)
-                .scale(scale)
                 .clip(RoundedCornerShape(6.dp))
                 .background(
-                    if (isHighlighted) categoryData.color
-                    else categoryData.color.copy(alpha = 0.85f)
+                    color = categoryData.color.copy(alpha = alpha * if (isHighlighted) 1f else 0.5f)
                 )
                 .border(
                     width = 1.dp,
-                    color = if (isHighlighted) Color.White.copy(alpha = 0.3f)
-                    else Color.White.copy(alpha = 0.15f),
+                    color = if (isHighlighted) Color.White.copy(alpha = 0.3f * alpha)
+                    else Color.White.copy(alpha = 0.08f),
                     shape = RoundedCornerShape(6.dp)
                 )
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = null // 移除默认波纹效果，使用自定义动画
+                    indication = null,
+                    enabled = isHighlighted
                 ) {
+                    isPressed = true
                     onClick(element)
+                    isPressed = false
                 }
                 .padding(4.dp)
         ) {
             Text(
                 text = element.atomicNumber.toString(),
-                color = Color.White.copy(alpha = 0.7f),
+                color = Color.White.copy(alpha = 0.7f * alpha),
                 fontSize = 8.sp,
                 modifier = Modifier.align(Alignment.TopStart)
             )
@@ -117,14 +118,14 @@ fun ElementCard(
             ) {
                 Text(
                     text = element.symbol,
-                    color = Color.White,
+                    color = Color.White.copy(alpha = alpha),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 6.dp)
                 )
                 Text(
                     text = element.nameZh,
-                    color = Color.White.copy(alpha = 0.8f),
+                    color = Color.White.copy(alpha = 0.8f * alpha),
                     fontSize = 9.sp
                 )
             }

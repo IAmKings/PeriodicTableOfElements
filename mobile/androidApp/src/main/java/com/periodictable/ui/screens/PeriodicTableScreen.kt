@@ -1,6 +1,8 @@
 package com.periodictable.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,16 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,11 +33,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.periodictable.data.Element
 import com.periodictable.data.ElementCategory
+import com.periodictable.ui.components.DataVisualization
 import com.periodictable.ui.components.ElementDetail
 import com.periodictable.ui.components.PeriodicGrid
+import com.periodictable.ui.components.QuizMode
+import com.periodictable.ui.components.SearchFilter
 import com.periodictable.ui.theme.AnimatedBackground
 
-@OptIn(ExperimentalMaterial3Api::class)
+enum class ViewMode {
+    TABLE, QUIZ, VISUALIZATION
+}
+
 @Composable
 fun PeriodicTableScreen(
     modifier: Modifier = Modifier
@@ -48,6 +51,7 @@ fun PeriodicTableScreen(
     var selectedElement by remember { mutableStateOf<Element?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategories by remember { mutableStateOf<Set<ElementCategory>>(emptySet()) }
+    var viewMode by remember { mutableStateOf(ViewMode.TABLE) }
 
     Box(
         modifier = modifier.fillMaxSize()
@@ -104,47 +108,72 @@ fun PeriodicTableScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    TextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        placeholder = {
-                            Text(
-                                text = "搜索元素...",
-                                color = Color.White.copy(alpha = 0.5f)
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search",
-                                tint = Color.White.copy(alpha = 0.5f)
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.White.copy(alpha = 0.08f),
-                            unfocusedContainerColor = Color.White.copy(alpha = 0.08f),
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            cursorColor = Color(0xFF06B6D4)
-                        ),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
+                    // View Mode Tabs
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        TabButton(
+                            text = "📊 周期表",
+                            isSelected = viewMode == ViewMode.TABLE,
+                            onClick = { viewMode = ViewMode.TABLE },
+                            modifier = Modifier.weight(1f)
+                        )
+                        TabButton(
+                            text = "🎯 测验",
+                            isSelected = viewMode == ViewMode.QUIZ,
+                            onClick = { viewMode = ViewMode.QUIZ },
+                            modifier = Modifier.weight(1f)
+                        )
+                        TabButton(
+                            text = "📈 可视化",
+                            isSelected = viewMode == ViewMode.VISUALIZATION,
+                            onClick = { viewMode = ViewMode.VISUALIZATION },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if (viewMode == ViewMode.TABLE) {
+                        SearchFilter(
+                            searchQuery = searchQuery,
+                            onSearchChange = { searchQuery = it },
+                            selectedCategories = selectedCategories,
+                            onCategoriesChange = { selectedCategories = it }
+                        )
+                    }
                 }
             }
 
-            PeriodicGrid(
-                selectedCategories = selectedCategories,
-                searchQuery = searchQuery,
-                onElementClick = { element ->
-                    selectedElement = element
-                },
-                onCategoriesChange = { selectedCategories = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            )
+            when (viewMode) {
+                ViewMode.TABLE -> {
+                    PeriodicGrid(
+                        selectedCategories = selectedCategories,
+                        searchQuery = searchQuery,
+                        onElementClick = { element ->
+                            selectedElement = element
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    )
+                }
+                ViewMode.QUIZ -> {
+                    QuizMode(
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                ViewMode.VISUALIZATION -> {
+                    DataVisualization(
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
         }
 
         ElementDetail(
@@ -153,3 +182,38 @@ fun PeriodicTableScreen(
         )
     }
 }
+
+@Composable
+private fun TabButton(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .height(40.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(
+                if (isSelected) Color(0xFF06B6D4).copy(alpha = 0.2f)
+                else Color.Transparent
+            )
+            .border(
+                width = 1.dp,
+                color = if (isSelected) Color(0xFF06B6D4).copy(alpha = 0.5f)
+                else Color.Transparent,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = if (isSelected) Color(0xFF06B6D4)
+            else Color.White.copy(alpha = 0.7f),
+            fontSize = 14.sp,
+            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
+        )
+    }
+}
+

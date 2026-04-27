@@ -3,7 +3,6 @@ package com.periodictable.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,7 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.periodictable.data.Element
@@ -33,7 +35,6 @@ fun PeriodicGrid(
     selectedCategories: Set<ElementCategory>,
     searchQuery: String,
     onElementClick: (Element) -> Unit,
-    onCategoriesChange: (Set<ElementCategory>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     fun isElementHighlighted(element: Element): Boolean {
@@ -44,6 +45,7 @@ fun PeriodicGrid(
             val q = searchQuery.lowercase()
             return element.symbol.lowercase().contains(q) ||
                     element.nameZh.contains(q) ||
+                    element.nameEn.lowercase().contains(q) ||
                     element.atomicNumber.toString() == q
         }
         return true
@@ -114,14 +116,25 @@ fun PeriodicGrid(
                 }
                 for (col in 0..17) {
                     val element = grid[row][col]
-                    if (element != null) {
-                        ElementCard(
-                            element = element,
-                            isHighlighted = isElementHighlighted(element),
-                            onClick = onElementClick
-                        )
-                    } else {
-                        Spacer(modifier = Modifier.size(48.dp))
+                    when {
+                        element != null -> {
+                            ElementCard(
+                                element = element,
+                                isHighlighted = isElementHighlighted(element),
+                                onClick = onElementClick
+                            )
+                        }
+                        // 镧系占位标记 (第5行第3列)
+                        row == 5 && col == 2 -> {
+                            LanthanidePlaceholder(text = "57-71", color = Color(0xFFEC4899))
+                        }
+                        // 锕系占位标记 (第6行第3列)
+                        row == 6 && col == 2 -> {
+                            LanthanidePlaceholder(text = "89-103", color = Color(0xFFF43F5E))
+                        }
+                        else -> {
+                            Spacer(modifier = Modifier.size(48.dp))
+                        }
                     }
                 }
             }
@@ -157,103 +170,35 @@ fun PeriodicGrid(
                 }
             }
         }
-
-        CategoryLegend(
-            selectedCategories = selectedCategories,
-            onCategoriesChange = onCategoriesChange
-        )
     }
 }
 
 @Composable
-fun CategoryLegend(
-    selectedCategories: Set<ElementCategory>,
-    onCategoriesChange: (Set<ElementCategory>) -> Unit,
+private fun LanthanidePlaceholder(
+    text: String,
+    color: Color,
     modifier: Modifier = Modifier
 ) {
-    val categoryColors = mapOf(
-        ElementCategory.ALKALI_METAL to Pair(Color(0xFFEF4444), "碱金属"),
-        ElementCategory.ALKALINE_EARTH_METAL to Pair(Color(0xFFF97316), "碱土金属"),
-        ElementCategory.TRANSITION_METAL to Pair(Color(0xFFEAB308), "过渡金属"),
-        ElementCategory.POST_TRANSITION_METAL to Pair(Color(0xFF22C55E), "后过渡金属"),
-        ElementCategory.METALLOID to Pair(Color(0xFF14B8A6), "准金属"),
-        ElementCategory.NONMETAL to Pair(Color(0xFF06B6D4), "非金属"),
-        ElementCategory.HALOGEN to Pair(Color(0xFF3B82F6), "卤素"),
-        ElementCategory.NOBLE_GAS to Pair(Color(0xFF6366F1), "惰性气体"),
-        ElementCategory.LANTHANIDE to Pair(Color(0xFFEC4899), "镧系元素"),
-        ElementCategory.ACTINIDE to Pair(Color(0xFFF43F5E), "锕系元素")
-    )
-
-    Column(modifier = modifier.padding(horizontal = 16.dp)) {
+    Box(
+        modifier = modifier
+            .size(48.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .drawWithCache {
+                val pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 4f), 0f)
+                onDrawWithContent {
+                    drawContent()
+                    drawRoundRect(
+                        color = color.copy(alpha = 0.4f),
+                        style = Stroke(width = 1.dp.toPx(), pathEffect = pathEffect)
+                    )
+                }
+            },
+        contentAlignment = Alignment.Center
+    ) {
         Text(
-            text = "元素分类",
-            color = Color.White.copy(alpha = 0.7f),
-            fontSize = 12.sp
+            text = text,
+            color = color.copy(alpha = 0.7f),
+            fontSize = 9.sp
         )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        val categories = ElementCategory.values().toList()
-        val rows = categories.chunked(2)
-
-        rows.forEach { rowCategories ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                rowCategories.forEach { category ->
-                    val (color, nameZh) = categoryColors.getValue(category)
-                    val isSelected = selectedCategories.contains(category)
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(32.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                if (isSelected) color.copy(alpha = 0.3f)
-                                else Color.White.copy(alpha = 0.05f)
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = if (isSelected) color else Color.White.copy(alpha = 0.1f),
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .clickable {
-                                val newSet = if (isSelected) {
-                                    selectedCategories - category
-                                } else {
-                                    selectedCategories + category
-                                }
-                                onCategoriesChange(newSet)
-                            }
-                            .padding(horizontal = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .background(color)
-                            )
-                            Text(
-                                text = nameZh,
-                                color = if (isSelected) Color.White
-                                else Color.White.copy(alpha = 0.7f),
-                                fontSize = 10.sp
-                            )
-                        }
-                    }
-                }
-
-                if (rowCategories.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-        }
     }
 }
