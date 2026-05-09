@@ -46,7 +46,8 @@ import kotlin.math.sin
 @Composable
 fun ElectronShell(
     element: Element,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    scale: Float = 1f
 ) {
     val shells = ElectronShells.getElectronShells(element.atomicNumber)
     val category = categoryInfo[element.category]!!
@@ -58,27 +59,29 @@ fun ElectronShell(
         mounted = true
     }
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .size(240.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.White.copy(alpha = 0.03f))
-                .padding(8.dp),
-            contentAlignment = Alignment.Center
-        ) {
+     Column(
+         modifier = modifier.fillMaxWidth(),
+         horizontalAlignment = Alignment.CenterHorizontally
+     ) {
+          val canvasSize = (220 * scale).dp
+         Box(
+             modifier = Modifier
+                 .size(canvasSize)
+                 .clip(RoundedCornerShape(8.dp))
+                 .background(Color.White.copy(alpha = 0.03f))
+                 .padding(2.dp),
+             contentAlignment = Alignment.Center
+         ) {
             ElectronShellCanvas(
                 element = element,
                 shells = shells,
                 primaryColor = primaryColor,
-                mounted = mounted
+                mounted = mounted,
+                scale = scale
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // 电子壳层信息
         Row(
@@ -116,7 +119,7 @@ fun ElectronShell(
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         // 总电子数
         Text(
@@ -127,20 +130,28 @@ fun ElectronShell(
     }
 }
 
-@Composable
-private fun ElectronShellCanvas(
-    element: Element,
-    shells: List<Int>,
-    primaryColor: Color,
-    mounted: Boolean
-) {
-    val baseRadius = 24f
-    val radiusIncrement = 18f
-    val centerX = 120f
-    val centerY = 120f
-
-    // 轨道动画旋转 - 每层不同方向和速度
-    val rotations = shells.mapIndexed { index, _ ->
+ @Composable
+ private fun ElectronShellCanvas(
+     element: Element,
+     shells: List<Int>,
+     primaryColor: Color,
+     mounted: Boolean,
+     scale: Float = 1f
+ ) {
+      // 根据壳层数动态计算，让轨道充分利用画布空间
+      val shellCount = shells.size
+      // 基础半径 - 最内层轨道离中心的距离
+      val baseRadius = 26f * scale
+      // 轨道间距 - 大幅扩大，充分展开每一层
+      val radiusIncrement = when {
+          shellCount <= 2 -> 50f * scale
+          shellCount <= 4 -> 45f * scale
+          shellCount <= 5 -> 40f * scale
+          else -> 35f * scale
+      }
+ 
+      // 轨道动画旋转 - 每层不同方向和速度
+      val rotations = shells.mapIndexed { index, _ ->
         val transition = rememberInfiniteTransition(label = "orbit-$index")
         val duration = 3000 + index * 1500
         val direction = if (index % 2 == 0) 1f else -1f
@@ -168,8 +179,11 @@ private fun ElectronShellCanvas(
     ).value
 
     Canvas(modifier = Modifier.fillMaxSize()) {
-        // 背景光晕
-        val glowRadius = baseRadius + shells.size * radiusIncrement + 30f
+        val centerX = size.width / 2
+        val centerY = size.height / 2
+
+         // 背景光晕
+         val glowRadius = baseRadius + shells.size * radiusIncrement + 20f
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
@@ -191,85 +205,87 @@ private fun ElectronShellCanvas(
                 radius = orbitRadius,
                 center = Offset(centerX, centerY),
                 style = androidx.compose.ui.graphics.drawscope.Stroke(
-                    width = 1f,
+                    width = 2f,
                     pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(
-                        floatArrayOf(4f, 4f),
+                        floatArrayOf(6f, 6f),
                         phase = if (mounted) (index * 10).toFloat() else 0f
                     )
                 )
             )
         }
 
-        // 原子核光晕
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(
-                    primaryColor.copy(alpha = 0.4f),
-                    primaryColor.copy(alpha = 0f)
-                ),
-                center = Offset(centerX, centerY),
-                radius = 24f
-            ),
-            radius = 24f,
-            center = Offset(centerX, centerY)
-        )
+         // 原子核光晕
+         drawCircle(
+             brush = Brush.radialGradient(
+                 colors = listOf(
+                     primaryColor.copy(alpha = 0.4f),
+                     primaryColor.copy(alpha = 0f)
+                 ),
+                 center = Offset(centerX, centerY),
+                 radius = 36f * scale
+             ),
+             radius = 36f * scale,
+             center = Offset(centerX, centerY)
+         )
 
-        // 原子核
-        drawCircle(
-            color = primaryColor,
-            radius = 16f,
-            center = Offset(centerX, centerY)
-        )
+         // 原子核
+         drawCircle(
+             color = primaryColor,
+             radius = 24f * scale,
+             center = Offset(centerX, centerY)
+         )
 
-        // 电子 - 每层旋转
-        shells.forEachIndexed { shellIndex, electronCount ->
-            val orbitRadius = baseRadius + shellIndex * radiusIncrement
-            val angleStep = 2 * Math.PI.toFloat() / electronCount
-            val rotation = rotations[shellIndex]
+         // 电子 - 每层旋转
+         shells.forEachIndexed { shellIndex, electronCount ->
+             val orbitRadius = baseRadius + shellIndex * radiusIncrement
+             val angleStep = 2 * Math.PI.toFloat() / electronCount
+             val rotation = rotations[shellIndex]
+             // 外层电子稍微缩小，避免拥挤
+             val electronScale = if (shellIndex >= 5) 0.8f else 1f
 
-            rotate(degrees = rotation, pivot = Offset(centerX, centerY)) {
-                for (i in 0 until electronCount) {
-                    val angle = angleStep * i - Math.PI.toFloat() / 2
-                    val electronX = centerX + orbitRadius * cos(angle)
-                    val electronY = centerY + orbitRadius * sin(angle)
+             rotate(degrees = rotation, pivot = Offset(centerX, centerY)) {
+                 for (i in 0 until electronCount) {
+                     val angle = angleStep * i - Math.PI.toFloat() / 2
+                     val electronX = centerX + orbitRadius * cos(angle)
+                     val electronY = centerY + orbitRadius * sin(angle)
 
-                    // 电子光晕
-                    drawCircle(
-                        color = primaryColor.copy(alpha = 0.3f),
-                        radius = 6f,
-                        center = Offset(electronX, electronY)
-                    )
+                     // 电子光晕
+                     drawCircle(
+                         color = primaryColor.copy(alpha = 0.35f),
+                         radius = 9f * scale * electronScale,
+                         center = Offset(electronX, electronY)
+                     )
 
-                    // 电子核心
-                    drawCircle(
-                        color = primaryColor,
-                        radius = 3f,
-                        center = Offset(electronX, electronY)
-                    )
+                     // 电子核心
+                     drawCircle(
+                         color = primaryColor,
+                         radius = 4.5f * scale * electronScale,
+                         center = Offset(electronX, electronY)
+                     )
 
-                    // 电子高光
-                    drawCircle(
-                        color = Color.White.copy(alpha = 0.8f),
-                        radius = 1f,
-                        center = Offset(electronX - 1f, electronY - 1f)
-                    )
-                }
-            }
-        }
+                     // 电子高光
+                     drawCircle(
+                         color = Color.White.copy(alpha = 0.8f),
+                         radius = 2f * scale * electronScale,
+                         center = Offset(electronX - 2f, electronY - 2f)
+                     )
+                 }
+             }
+         }
     }
 
-    // 绘制元素符号（在 Canvas 上层）
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = element.symbol,
-            color = Color.White,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Monospace,
-            modifier = Modifier.padding(top = 4.dp)
-        )
-    }
+     // 绘制元素符号（在 Canvas 上层）
+     Box(
+         modifier = Modifier.fillMaxSize(),
+         contentAlignment = Alignment.Center
+     ) {
+         Text(
+             text = element.symbol,
+             color = Color.White,
+             fontSize = (18 * scale).sp,
+             fontWeight = FontWeight.Bold,
+             fontFamily = FontFamily.Monospace,
+             modifier = Modifier.padding(top = 4.dp)
+         )
+     }
 }
