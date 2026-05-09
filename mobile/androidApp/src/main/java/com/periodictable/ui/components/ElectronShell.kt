@@ -141,7 +141,7 @@ fun ElectronShell(
       // 根据壳层数动态计算，让轨道充分利用画布空间
       val shellCount = shells.size
       // 基础半径 - 最内层轨道离中心的距离
-      val baseRadius = 26f * scale
+       val baseRadius = 32f * scale
       // 轨道间距 - 大幅扩大，充分展开每一层
       val radiusIncrement = when {
           shellCount <= 2 -> 50f * scale
@@ -215,25 +215,25 @@ fun ElectronShell(
         }
 
          // 原子核光晕
-         drawCircle(
-             brush = Brush.radialGradient(
-                 colors = listOf(
-                     primaryColor.copy(alpha = 0.4f),
-                     primaryColor.copy(alpha = 0f)
-                 ),
-                 center = Offset(centerX, centerY),
-                 radius = 36f * scale
-             ),
-             radius = 36f * scale,
-             center = Offset(centerX, centerY)
-         )
+          drawCircle(
+              brush = Brush.radialGradient(
+                  colors = listOf(
+                      primaryColor.copy(alpha = 0.4f),
+                      primaryColor.copy(alpha = 0f)
+                  ),
+                  center = Offset(centerX, centerY),
+                  radius = 32f * scale
+              ),
+              radius = 32f * scale,
+              center = Offset(centerX, centerY)
+          )
 
-         // 原子核
-         drawCircle(
-             color = primaryColor,
-             radius = 24f * scale,
-             center = Offset(centerX, centerY)
-         )
+          // 原子核
+          drawCircle(
+              color = primaryColor,
+              radius = 22f * scale,
+              center = Offset(centerX, centerY)
+          )
 
          // 电子 - 每层旋转
          shells.forEachIndexed { shellIndex, electronCount ->
@@ -279,13 +279,13 @@ fun ElectronShell(
          modifier = Modifier.fillMaxSize(),
          contentAlignment = Alignment.Center
      ) {
-         Text(
-             text = element.symbol,
-             color = Color.White,
-             fontSize = (18 * scale).sp,
-             fontWeight = FontWeight.Bold,
-             fontFamily = FontFamily.Monospace,
-             modifier = Modifier.padding(top = 4.dp)
-         )
+          Text(
+              text = element.symbol,
+              color = Color.White,
+              fontSize = (9 * scale).sp,
+              fontWeight = FontWeight.Bold,
+              fontFamily = FontFamily.Monospace,
+              modifier = Modifier.padding(top = 2.dp)
+          )
      }
 }

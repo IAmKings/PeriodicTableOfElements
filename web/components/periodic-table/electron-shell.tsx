@@ -164,11 +164,11 @@ export function ElectronShell({ element }: ElectronShellProps) {
     setMounted(true)
   }, [])
 
-  // 计算每个壳层的半径和电子位置
-  const baseRadius = 24
-  const radiusIncrement = 18
-  const centerX = 120
-  const centerY = 120
+   // 计算每个壳层的半径和电子位置
+   const baseRadius = 30
+   const radiusIncrement = 18
+   const centerX = 120
+   const centerY = 120
 
   // 生成电子位置
   const generateElectronPositions = (shellIndex: number, electronCount: number) => {
@@ -209,7 +209,7 @@ export function ElectronShell({ element }: ElectronShellProps) {
     <div className="flex flex-col items-center">
       {/* 原子模型 SVG */}
       <div className="relative">
-        <svg width="240" height="240" viewBox="0 0 240 240" className="overflow-visible">
+         <svg width="240" height="240" viewBox="0 0 240 240" className="overflow-visible">
           {/* 背景光晕 */}
           <defs>
             <radialGradient id={`nucleus-glow-${element.atomicNumber}`} cx="50%" cy="50%" r="50%">
@@ -255,27 +255,27 @@ export function ElectronShell({ element }: ElectronShellProps) {
             )
           })}
 
-          {/* 原子核 */}
-          <circle
-            cx={centerX}
-            cy={centerY}
-            r="16"
-            fill={primaryColor}
-            className={mounted ? "animate-pulse" : ""}
-            style={{ animationDuration: "2s" }}
-          />
-          
-          {/* 原子核内的元素符号 */}
-          <text
-            x={centerX}
-            y={centerY}
-            textAnchor="middle"
-            dominantBaseline="central"
-            fill="white"
-            fontSize="10"
-            fontWeight="bold"
-            fontFamily="monospace"
-          >
+           {/* 原子核 */}
+           <circle
+             cx={centerX}
+             cy={centerY}
+             r="16"
+             fill={primaryColor}
+             className={mounted ? "animate-pulse" : ""}
+             style={{ animationDuration: "2s" }}
+           />
+           
+           {/* 原子核内的元素符号 */}
+           <text
+             x={centerX}
+             y={centerY}
+             textAnchor="middle"
+             dominantBaseline="central"
+             fill="white"
+             fontSize="9"
+             fontWeight="bold"
+             fontFamily="monospace"
+           >
             {element.symbol}
           </text>
 
