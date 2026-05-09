@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -104,14 +105,17 @@ fun ElementCard(
                     onClick(element)
                     isPressed = false
                 }
-                .padding(4.dp)
+                .padding(3.dp)
         ) {
-            Text(
-                text = element.atomicNumber.toString(),
-                color = Color.White.copy(alpha = 0.7f * alpha),
-                fontSize = 8.sp,
-                modifier = Modifier.align(Alignment.TopStart)
-            )
+             Text(
+                 text = element.atomicNumber.toString(),
+                 color = Color.White.copy(alpha = 0.7f * alpha),
+                 fontSize = 7.sp,
+                 modifier = Modifier
+                     .align(Alignment.TopStart)
+                     .offset(y = (-6).dp)
+                     .padding(start = 1.dp)
+             )
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -119,14 +123,14 @@ fun ElementCard(
                 Text(
                     text = element.symbol,
                     color = Color.White.copy(alpha = alpha),
-                    fontSize = 16.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 6.dp)
+                    modifier = Modifier.padding(top = 4.dp)
                 )
                 Text(
                     text = element.nameZh,
                     color = Color.White.copy(alpha = 0.8f * alpha),
-                    fontSize = 9.sp
+                    fontSize = 8.sp
                 )
             }
         }
