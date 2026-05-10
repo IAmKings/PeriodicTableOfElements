@@ -1,7 +1,5 @@
 package com.periodictable.ui.components
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,17 +12,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.BlurredEdgeTreatment
-import androidx.compose.foundation.layout.offset
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,6 +26,7 @@ import com.periodictable.data.Element
 import com.periodictable.data.categoryInfo
 
 @Composable
+@NonRestartableComposable  // 118 个卡片 × 减少每个的编译开销
 fun ElementCard(
     element: Element,
     isHighlighted: Boolean,
@@ -41,47 +35,14 @@ fun ElementCard(
     cellSize: Int = 48
 ) {
     val categoryData = categoryInfo[element.category]!!
-    var isPressed by remember { mutableStateOf(false) }
 
-    // 缩放动画
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 1.1f else 1f,
-        animationSpec = tween(durationMillis = 200),
-        label = "card-scale"
-    )
-
-    // 透明度动画
-    val alpha by animateFloatAsState(
-        targetValue = if (isHighlighted) 1f else 0.2f,
-        animationSpec = tween(durationMillis = 300),
-        label = "card-alpha"
-    )
-
-    // 发光强度动画
-    val glowAlpha by animateFloatAsState(
-        targetValue = if (isPressed && isHighlighted) 0.6f else 0f,
-        animationSpec = tween(durationMillis = 200),
-        label = "glow-alpha"
-    )
+    // 透明度 - 无动画避免切换卡顿
+    val alpha = if (isHighlighted) 1f else 0.2f
 
     Box(
         modifier = modifier
             .size(cellSize.dp)
-            .scale(scale)
     ) {
-        // 发光背景
-        if (isPressed && isHighlighted) {
-            Box(
-                modifier = Modifier
-                    .size(cellSize.dp)
-                    .blur(
-                        radiusX = 12.dp,
-                        radiusY = 12.dp,
-                        edgeTreatment = BlurredEdgeTreatment.Unbounded
-                    )
-                    .background(categoryData.color.copy(alpha = glowAlpha * 0.5f))
-            )
-        }
 
         Box(
             modifier = Modifier
@@ -101,9 +62,7 @@ fun ElementCard(
                     indication = null,
                     enabled = isHighlighted
                 ) {
-                    isPressed = true
                     onClick(element)
-                    isPressed = false
                 }
                 .padding(3.dp)
         ) {
@@ -113,7 +72,7 @@ fun ElementCard(
                  fontSize = 7.sp,
                  modifier = Modifier
                      .align(Alignment.TopStart)
-                     .offset(y = (-6).dp)
+                     .offset(y = (-4).dp)
                      .padding(start = 1.dp)
              )
             Column(

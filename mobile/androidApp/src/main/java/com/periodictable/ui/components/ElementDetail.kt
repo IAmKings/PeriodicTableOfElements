@@ -15,23 +15,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.draw.blur
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
@@ -49,6 +50,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.periodictable.data.Element
 import com.periodictable.data.categoryInfo
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun ElementDetail(
@@ -67,15 +72,13 @@ fun ElementDetail(
             dismissOnBackPress = true
         )
     ) {
-        // 背景蒙层 + 垂直滚动容器 - 对齐web端的 overflow-y-auto 和 backdrop blur
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.7f)) // bg-black/70 - 对齐web端透明度
+                .background(Color.Black.copy(alpha = 0.7f))
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            // 主卡片容器 - 对齐web端 max-w-2xl 和 animate-in 效果
             AnimatedVisibility(
                 visible = true,
                 enter = fadeIn(animationSpec = tween(200)) +
@@ -92,219 +95,289 @@ fun ElementDetail(
                 Surface(
                     modifier = modifier
                         .fillMaxWidth()
-                        .widthIn(max = 480.dp) // 适配移动端，约等于web端max-w-2xl的比例
+                        .widthIn(max = 480.dp)
                         .shadow(
-                            elevation = 24.dp, // 对齐web端 shadow-2xl
+                            elevation = 24.dp,
                             spotColor = Color.Black.copy(alpha = 0.4f),
                             ambientColor = Color.Black.copy(alpha = 0.2f)
                         ),
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFF0F172A).copy(alpha = 0.95f), // bg-slate-900/95
+                    color = Color(0xFF0F172A).copy(alpha = 0.95f),
                     border = androidx.compose.foundation.BorderStroke(
                         width = 1.dp,
-                        color = Color.White.copy(alpha = 0.1f) // border-white/10
+                        color = Color.White.copy(alpha = 0.1f)
                     )
                 ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    val categoryData = categoryInfo[element.category]!!
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        val categoryData = categoryInfo[element.category]!!
+                        val scrollState = rememberScrollState()
+                        var showHint by remember { mutableStateOf(true) }
+                        val density = LocalDensity.current
+                        val coroutineScope = rememberCoroutineScope()
 
-                    // 顶部颜色条 - 对齐web端 h-2
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp) // h-2 = 8dp
-                            .background(categoryData.color)
-                    )
-
-                    // 关闭按钮 - 对齐web端 absolute top-4 right-4
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp, end = 16.dp),
-                        contentAlignment = Alignment.TopEnd
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Color.White.copy(alpha = 0.1f)) // bg-white/10
-                                .clickable { onClose() },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Close",
-                                tint = Color.White,
-                                modifier = Modifier.size(16.dp) // w-4 h-4 = 16dp
-                            )
-                        }
-                    }
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 480.dp)
-                            .verticalScroll(rememberScrollState())
-                            .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
-                    ) {
-                        // 主信息区域 - 对齐web端 flex items-start gap-6
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(24.dp),
-                            verticalAlignment = Alignment.Top
-                        ) {
-                            // 元素符号卡片 - 对齐web端 w-24 h-24
-                            Box(
-                                modifier = Modifier
-                                    .size(96.dp) // w-24 h-24 = 96dp
-                                    .clip(RoundedCornerShape(8.dp)) // rounded-lg = 8dp
-                                    .background(categoryData.color)
-                                    .border(
-                                        width = 1.dp,
-                                        color = Color.White.copy(alpha = 0.2f), // border-white/20
-                                        shape = RoundedCornerShape(8.dp)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                    Text(
-                                        text = element.atomicNumber.toString(),
-                                        color = Color.White.copy(alpha = 0.7f), // text-white/70
-                                        fontSize = 12.sp, // text-xs = 12sp
-                                        fontWeight = FontWeight.Normal
-                                    )
-                                    Text(
-                                        text = element.symbol,
-                                        color = Color.White,
-                                        fontSize = 36.sp, // text-4xl = 36sp
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = String.format("%.3f", element.atomicMass),
-                                        color = Color.White.copy(alpha = 0.8f), // text-white/80
-                                        fontSize = 14.sp // text-sm = 14sp
-                                    )
-                                }
-                            }
-
-                            // 名称和类别 - 对齐web端 flex-1
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = element.nameZh,
-                                    color = Color.White,
-                                    fontSize = 24.sp, // text-2xl = 24sp
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = element.nameEn,
-                                    color = Color.White.copy(alpha = 0.7f), // text-white/70
-                                    fontSize = 18.sp // text-lg = 18sp
-                                )
-
-                                Spacer(modifier = Modifier.height(8.dp)) // mt-2
-
-                                // 类别标签 - 对齐web端 rounded-full px-3 py-1
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .background(categoryData.color)
-                                        .padding(horizontal = 12.dp, vertical = 4.dp)
-                                ) {
-                                    Text(
-                                        text = "${categoryData.nameZh} / ${categoryData.nameEn}",
-                                        color = Color.White,
-                                        fontSize = 12.sp // text-xs = 12sp
-                                    )
-                                }
+                        LaunchedEffect(scrollState.value) {
+                            val threshold = with(density) { 5.dp.toPx() }.toInt()
+                            val isAtBottom = scrollState.value >= scrollState.maxValue - threshold
+                            if (isAtBottom) {
+                                delay(100)
+                                showHint = false
+                            } else {
+                                showHint = true
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp)) // mt-4
-
-                        // 描述文字 - 对齐web端 text-sm text-white/70 leading-relaxed
-                        Text(
-                            text = element.description,
-                            color = Color.White.copy(alpha = 0.7f),
-                            fontSize = 14.sp, // text-sm = 14sp
-                            lineHeight = 20.sp // leading-relaxed
-                        )
-
-                        Spacer(modifier = Modifier.height(24.dp)) // mt-6
-
-                        // 电子壳层可视化 - 对齐web端 p-4 bg-white/5 rounded-lg border
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp)) // rounded-lg
-                                .background(Color.White.copy(alpha = 0.05f)) // bg-white/5
-                                .border(
-                                    width = 1.dp,
-                                    color = Color.White.copy(alpha = 0.1f), // border-white/10
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                                .padding(16.dp) // p-4
+                                .height(8.dp)
+                                .background(categoryData.color)
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Column {
-                                Text(
-                                    text = "电子层分布 / Electron Shells",
-                                    color = Color.White.copy(alpha = 0.8f), // text-white/80
-                                    fontSize = 14.sp, // text-sm
-                                    fontWeight = FontWeight.Medium, // font-medium
-                                    modifier = Modifier
-                                        .padding(bottom = 16.dp) // mb-4
-                                        .align(Alignment.CenterHorizontally) // text-center
+                            Box(
+                                modifier = Modifier
+                                    .width(36.dp)
+                                    .height(4.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(Color.White.copy(alpha = 0.2f))
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp, end = 16.dp),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(Color.White.copy(alpha = 0.1f))
+                                    .clickable { onClose() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
                                 )
-                                ElectronShell(element = element, scale = 1.5f)
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp)) // mt-6
-
-                        // 属性网格 - 对齐web端 grid-cols-2 gap-4
-                        val properties = listOf(
-                            Triple("电子排布", "Electron Config", element.electronConfiguration),
-                            Triple("电负性", "Electronegativity", element.electronegativity?.let { "%.2f".format(it) } ?: "N/A"),
-                            Triple("熔点", "Melting Point", element.meltingPoint?.let { "%.2f °C".format(it) } ?: "N/A"),
-                            Triple("沸点", "Boiling Point", element.boilingPoint?.let { "%.2f °C".format(it) } ?: "N/A"),
-                            Triple("密度", "Density", element.density?.let { "%.4f g/cm³".format(it) } ?: "N/A"),
-                            Triple("发现年份", "Discovery", element.discoveryYear?.toString() ?: "古代"),
-                            Triple("周期", "Period", element.period.toString()),
-                            Triple("族", "Group", element.group?.toString() ?: "N/A")
-                        )
-
-                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) { // gap-4
-                            properties.chunked(2).forEach { rowProperties ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 480.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .verticalScroll(scrollState)
+                                    .padding(start = 24.dp, end = 24.dp, bottom = 40.dp)
+                            ) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp) // gap-4
+                                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                                    verticalAlignment = Alignment.Top
                                 ) {
-                                    rowProperties.forEach { (labelZh, labelEn, value) ->
-                                        PropertyItem(
-                                            labelZh = labelZh,
-                                            labelEn = labelEn,
-                                            value = value,
-                                            modifier = Modifier.weight(1f)
-                                        )
+                                    Box(
+                                        modifier = Modifier
+                                            .size(96.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(categoryData.color)
+                                            .border(
+                                                width = 1.dp,
+                                                color = Color.White.copy(alpha = 0.2f),
+                                                shape = RoundedCornerShape(8.dp)
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                                        ) {
+                                            Text(
+                                                text = element.atomicNumber.toString(),
+                                                color = Color.White.copy(alpha = 0.7f),
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Normal
+                                            )
+                                            Text(
+                                                text = element.symbol,
+                                                color = Color.White,
+                                                fontSize = 36.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Text(
+                                                text = String.format("%.3f", element.atomicMass),
+                                                color = Color.White.copy(alpha = 0.8f),
+                                                fontSize = 14.sp
+                                            )
+                                        }
                                     }
-                                    if (rowProperties.size == 1) {
-                                        Spacer(modifier = Modifier.weight(1f))
+
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = element.nameZh,
+                                            color = Color.White,
+                                            fontSize = 24.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = element.nameEn,
+                                            color = Color.White.copy(alpha = 0.7f),
+                                            fontSize = 18.sp
+                                        )
+
+                                        Spacer(modifier = Modifier.height(8.dp))
+
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(16.dp))
+                                                .background(categoryData.color)
+                                                .padding(horizontal = 12.dp, vertical = 4.dp)
+                                        ) {
+                                            Text(
+                                                text = "${categoryData.nameZh} / ${categoryData.nameEn}",
+                                                color = Color.White,
+                                                fontSize = 12.sp
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Text(
+                                    text = element.description,
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    fontSize = 14.sp,
+                                    lineHeight = 20.sp
+                                )
+
+                                Spacer(modifier = Modifier.height(24.dp))
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(Color.White.copy(alpha = 0.05f))
+                                        .border(
+                                            width = 1.dp,
+                                            color = Color.White.copy(alpha = 0.1f),
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                        .padding(16.dp)
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = "电子层分布 / Electron Shells",
+                                            color = Color.White.copy(alpha = 0.8f),
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            modifier = Modifier
+                                                .padding(bottom = 16.dp)
+                                                .align(Alignment.CenterHorizontally)
+                                        )
+                                        ElectronShell(element = element, scale = 1.5f)
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(24.dp))
+
+                                val properties = listOf(
+                                    Triple("电子排布", "Electron Config", element.electronConfiguration),
+                                    Triple("电负性", "Electronegativity", element.electronegativity?.let { "%.2f".format(it) } ?: "N/A"),
+                                    Triple("熔点", "Melting Point", element.meltingPoint?.let { "%.2f °C".format(it) } ?: "N/A"),
+                                    Triple("沸点", "Boiling Point", element.boilingPoint?.let { "%.2f °C".format(it) } ?: "N/A"),
+                                    Triple("密度", "Density", element.density?.let { "%.4f g/cm³".format(it) } ?: "N/A"),
+                                    Triple("发现年份", "Discovery", element.discoveryYear?.toString() ?: "古代"),
+                                    Triple("周期", "Period", element.period.toString()),
+                                    Triple("族", "Group", element.group?.toString() ?: "N/A")
+                                )
+
+                                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    properties.chunked(2).forEach { rowProperties ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                        ) {
+                                            rowProperties.forEach { (labelZh, labelEn, value) ->
+                                                PropertyItem(
+                                                    labelZh = labelZh,
+                                                    labelEn = labelEn,
+                                                    value = value,
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                            }
+                                            if (rowProperties.size == 1) {
+                                                Spacer(modifier = Modifier.weight(1f))
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = showHint,
+                                enter = fadeIn(animationSpec = tween(300)),
+                                exit = fadeOut(animationSpec = tween(300)),
+                                modifier = Modifier.align(Alignment.BottomCenter)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(40.dp)
+                                        .background(
+                                            brush = Brush.verticalGradient(
+                                                colors = listOf(
+                                                    Color.Transparent,
+                                                    Color(0xFF0F172A).copy(alpha = 0.9f)
+                                                )
+                                            )
+                                        )
+                                        .clickable {
+                                            coroutineScope.launch {
+                                                scrollState.animateScrollTo(scrollState.maxValue)
+                                            }
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.KeyboardArrowDown,
+                                            contentDescription = "Swipe down",
+                                            tint = Color.White.copy(alpha = 0.5f),
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Text(
+                                            text = "下滑查看更多",
+                                            color = Color.White.copy(alpha = 0.5f),
+                                            fontSize = 10.sp
+                                        )
                                     }
                                 }
                             }
                         }
                     }
                 }
-                } // AnimatedVisibility
             }
         }
     }
 }
 
 @Composable
-private fun PropertyItem(
+fun PropertyItem(
     labelZh: String,
     labelEn: String,
     value: String,
@@ -312,34 +385,34 @@ private fun PropertyItem(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp)) // rounded-lg
-            .background(Color.White.copy(alpha = 0.05f)) // bg-white/5
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.White.copy(alpha = 0.05f))
             .border(
                 width = 1.dp,
-                color = Color.White.copy(alpha = 0.05f), // border-white/5
+                color = Color.White.copy(alpha = 0.05f),
                 shape = RoundedCornerShape(8.dp)
             )
-            .padding(12.dp) // p-3
+            .padding(12.dp)
     ) {
         Column {
             Row {
                 Text(
                     text = labelZh,
-                    color = Color.White.copy(alpha = 0.5f), // text-white/50
-                    fontSize = 12.sp // text-xs = 12sp
+                    color = Color.White.copy(alpha = 0.5f),
+                    fontSize = 12.sp
                 )
                 Text(
                     text = " / $labelEn",
-                    color = Color.White.copy(alpha = 0.3f), // text-white/30
-                    fontSize = 12.sp // text-xs = 12sp
+                    color = Color.White.copy(alpha = 0.3f),
+                    fontSize = 12.sp
                 )
             }
-            Spacer(modifier = Modifier.height(4.dp)) // mb-1
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = value,
                 color = Color.White,
-                fontSize = 14.sp, // text-sm
-                fontWeight = FontWeight.Medium, // font-medium
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
                 fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
             )
         }

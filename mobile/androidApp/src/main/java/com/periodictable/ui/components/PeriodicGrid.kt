@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,71 +34,73 @@ import com.periodictable.data.ElementCategory
 import com.periodictable.data.elements
 
 @Composable
+@NonRestartableComposable  // 告诉编译器无需支持部分重组，大幅减少编译开销
 fun PeriodicGrid(
-    selectedCategories: Set<ElementCategory>,
-    searchQuery: String,
+    highlightedAtomicNumbers: Set<Int>,
     onElementClick: (Element) -> Unit,
+    horizontalScrollState: ScrollState,
+    verticalScrollState: ScrollState,
     modifier: Modifier = Modifier
 ) {
-    fun isElementHighlighted(element: Element): Boolean {
-        if (selectedCategories.isNotEmpty() && element.category !in selectedCategories) {
-            return false
+    fun isElementHighlighted(element: Element): Boolean = element.atomicNumber in highlightedAtomicNumbers
+
+    // 缓存网格数据，避免每次重组重新计算
+    val (grid) = remember {
+        val mainElements = elements.filter {
+            it.category != ElementCategory.LANTHANIDE &&
+            it.category != ElementCategory.ACTINIDE
         }
-        if (searchQuery.isNotEmpty()) {
-            val q = searchQuery.lowercase()
-            return element.symbol.lowercase().contains(q) ||
-                    element.nameZh.contains(q) ||
-                    element.nameEn.lowercase().contains(q) ||
-                    element.atomicNumber.toString() == q
+
+        val rows = 9
+        val cols = 18
+        val gridData: List<MutableList<Element?>> = List(rows) { MutableList<Element?>(cols) { null } }
+
+        mainElements.forEach { element ->
+            val row = element.period - 1
+            val col = element.group?.minus(1)
+            if (col != null && row < 7) {
+                gridData[row][col] = element
+            }
         }
-        return true
+
+        // 放置镧系和锕系元素
+        elements.filter { it.category == ElementCategory.LANTHANIDE }.forEachIndexed { index, element ->
+            if (3 + index < cols) {
+                gridData[7][3 + index] = element
+            }
+        }
+        elements.filter { it.category == ElementCategory.ACTINIDE }.forEachIndexed { index, element ->
+            if (3 + index < cols) {
+                gridData[8][3 + index] = element
+            }
+        }
+
+        Triple(gridData, rows, cols)
     }
 
-    val mainElements = elements.filter {
-        it.category != ElementCategory.LANTHANIDE &&
-        it.category != ElementCategory.ACTINIDE
-    }
+    val cellSize = 38 // 进一步减小单元格尺寸以容纳更多内容
+    val gridWidth = cellSize * 18 + 24 // 18列 + 左侧序号宽度
 
-    val gridRows = 9
-    val gridCols = 18
-    val grid: List<MutableList<Element?>> = List(gridRows) { MutableList<Element?>(gridCols) { null } }
-
-    mainElements.forEach { element ->
-        val row = element.period - 1
-        val col = element.group?.minus(1)
-        if (col != null && row < 7) {
-            grid[row][col] = element
-        }
-    }
-
-    // 放置镧系和锕系元素
-    elements.filter { it.category == ElementCategory.LANTHANIDE }.forEachIndexed { index, element ->
-        if (3 + index < gridCols) {
-            grid[7][3 + index] = element
-        }
-    }
-    elements.filter { it.category == ElementCategory.ACTINIDE }.forEachIndexed { index, element ->
-        if (3 + index < gridCols) {
-            grid[8][3 + index] = element
-        }
-    }
-
-    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
+    // PHASE 0 验证2: 外层单次横向 + 纵向滚动（移除9个Row各自的horizontalScroll）
+    Column(
+        modifier = modifier
+            .width(gridWidth.dp)
+            .horizontalScroll(horizontalScrollState)
+            .verticalScroll(verticalScrollState)
+    ) {
         // 族号头
         Row(
-            modifier = Modifier
-                .horizontalScroll(rememberScrollState())
-                .padding(start = 24.dp)
+            modifier = Modifier.padding(start = 24.dp)
         ) {
             for (i in 1..18) {
                 Box(
-                    modifier = Modifier.size(48.dp),
+                    modifier = Modifier.size(cellSize.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = i.toString(),
                         color = Color.White.copy(alpha = 0.4f),
-                        fontSize = 10.sp
+                        fontSize = 9.sp
                     )
                 }
             }
@@ -103,15 +108,17 @@ fun PeriodicGrid(
 
         // 主表
         for (row in 0..6) {
-            Row(modifier = Modifier.padding(vertical = 1.dp)) {
+            Row(
+                modifier = Modifier.padding(vertical = 1.dp)
+            ) {
                 Box(
-                    modifier = Modifier.size(24.dp, 48.dp),
+                    modifier = Modifier.size(24.dp, cellSize.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = (row + 1).toString(),
                         color = Color.White.copy(alpha = 0.4f),
-                        fontSize = 10.sp
+                        fontSize = 9.sp
                     )
                 }
                 for (col in 0..17) {
@@ -121,19 +128,20 @@ fun PeriodicGrid(
                             ElementCard(
                                 element = element,
                                 isHighlighted = isElementHighlighted(element),
-                                onClick = onElementClick
+                                onClick = onElementClick,
+                                cellSize = cellSize
                             )
                         }
                         // 镧系占位标记 (第5行第3列)
                         row == 5 && col == 2 -> {
-                            LanthanidePlaceholder(text = "57-71", color = Color(0xFFEC4899))
+                            LanthanidePlaceholder(text = "57-71", color = Color(0xFFEC4899), cellSize = cellSize)
                         }
                         // 锕系占位标记 (第6行第3列)
                         row == 6 && col == 2 -> {
-                            LanthanidePlaceholder(text = "89-103", color = Color(0xFFF43F5E))
+                            LanthanidePlaceholder(text = "89-103", color = Color(0xFFF43F5E), cellSize = cellSize)
                         }
                         else -> {
-                            Spacer(modifier = Modifier.size(48.dp))
+                            Spacer(modifier = Modifier.size(cellSize.dp))
                         }
                     }
                 }
@@ -144,28 +152,31 @@ fun PeriodicGrid(
 
         // 镧系和锕系
         for (row in 7..8) {
-            Row(modifier = Modifier.padding(vertical = 1.dp)) {
+            Row(
+                modifier = Modifier.padding(vertical = 1.dp)
+            ) {
                 Box(
-                    modifier = Modifier.size(24.dp, 48.dp),
+                    modifier = Modifier.size(24.dp, cellSize.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = if (row == 7) "*" else "**",
                         color = Color.White.copy(alpha = 0.4f),
-                        fontSize = 10.sp
+                        fontSize = 9.sp
                     )
                 }
-                Spacer(modifier = Modifier.size(48.dp * 3))
+                Spacer(modifier = Modifier.size(cellSize.dp * 3))
                 for (col in 3..17) {
                     val element = grid[row][col]
                     if (element != null) {
                         ElementCard(
                             element = element,
                             isHighlighted = isElementHighlighted(element),
-                            onClick = onElementClick
+                            onClick = onElementClick,
+                            cellSize = cellSize
                         )
                     } else {
-                        Spacer(modifier = Modifier.size(48.dp))
+                        Spacer(modifier = Modifier.size(cellSize.dp))
                     }
                 }
             }
@@ -174,14 +185,15 @@ fun PeriodicGrid(
 }
 
 @Composable
-private fun LanthanidePlaceholder(
+fun LanthanidePlaceholder(
     text: String,
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    cellSize: Int = 42
 ) {
     Box(
         modifier = modifier
-            .size(48.dp)
+            .size(cellSize.dp)
             .clip(RoundedCornerShape(6.dp))
             .drawWithCache {
                 val pathEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 4f), 0f)

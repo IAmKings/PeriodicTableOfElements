@@ -47,3 +47,26 @@ mobile/androidApp/debug/
 # 临时文件
 *.tmp
 *.temp
+
+# Next.js / Web 构建产物
+web/.next/
+web/out/
+web/node_modules/
+web/.vercel
+
+# npm / pnpm / yarn 锁
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# 测试覆盖率
+coverage/
+.nyc_output/
+
+# 类型检查缓存
+*.tsbuildinfo

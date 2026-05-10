@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -33,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.periodictable.data.Element
 import com.periodictable.data.ElementCategory
+import com.periodictable.data.elements
 import com.periodictable.ui.components.DataVisualization
 import com.periodictable.ui.components.ElementDetail
 import com.periodictable.ui.components.PeriodicGrid
@@ -52,11 +55,38 @@ fun PeriodicTableScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategories by remember { mutableStateOf<Set<ElementCategory>>(emptySet()) }
     var viewMode by remember { mutableStateOf(ViewMode.TABLE) }
+    
+    // 缓存滚动状态，避免 tab 切换时重建
+    val horizontalScrollState = rememberScrollState()
+    val verticalScrollState = rememberScrollState()
+
+    // PHASE 1: 高亮集合提前计算，避免 PeriodicGrid 内部 remember(key) 触发全量重算
+    val highlightedElements = remember(searchQuery, selectedCategories) {
+        elements.filter { element ->
+            if (selectedCategories.isNotEmpty() && element.category !in selectedCategories) {
+                return@filter false
+            }
+            if (searchQuery.isNotEmpty()) {
+                val q = searchQuery.lowercase()
+                element.symbol.lowercase().contains(q) ||
+                        element.nameZh.contains(q) ||
+                        element.nameEn.lowercase().contains(q) ||
+                        element.atomicNumber.toString() == q
+            } else {
+                true
+            }
+        }.map { it.atomicNumber }.toSet()  // 直接输出 Set<Int>，避免下游再转换
+    }
 
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        AnimatedBackground()
+        // 静态背景 - 避免动态动画导致卡顿
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF0F172A))
+        )
 
         Column {
             Surface(
@@ -150,28 +180,49 @@ fun PeriodicTableScreen(
                 }
             }
 
-            when (viewMode) {
-                ViewMode.TABLE -> {
+            // 关键优化: Box 布局 + alpha 控制可见性，非当前 tab 拦截触摸
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                // 周期表 - 仅在 TABLE 模式时允许交互
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(if (viewMode == ViewMode.TABLE) 1f else 0f)
+                ) {
                     PeriodicGrid(
-                        selectedCategories = selectedCategories,
-                        searchQuery = searchQuery,
+                        highlightedAtomicNumbers = highlightedElements,
                         onElementClick = { element ->
                             selectedElement = element
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
+                        horizontalScrollState = horizontalScrollState,
+                        verticalScrollState = verticalScrollState,
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
-                ViewMode.QUIZ -> {
-                    QuizMode(
-                        modifier = Modifier.weight(1f)
-                    )
+
+                // Quiz 模式 - 仅在 QUIZ 模式时允许交互
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(if (viewMode == ViewMode.QUIZ) 1f else 0f)
+                ) {
+                    if (viewMode == ViewMode.QUIZ) {  // 只在当前 tab 时才添加到组合树
+                        QuizMode(modifier = Modifier.fillMaxSize())
+                    }
                 }
-                ViewMode.VISUALIZATION -> {
-                    DataVisualization(
-                        modifier = Modifier.weight(1f)
-                    )
+
+                // 可视化模式 - 仅在 VISUALIZATION 模式时允许交互
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(if (viewMode == ViewMode.VISUALIZATION) 1f else 0f)
+                ) {
+                    if (viewMode == ViewMode.VISUALIZATION) {  // 只在当前 tab 时才添加到组合树
+                        DataVisualization(modifier = Modifier.fillMaxSize())
+                    }
                 }
             }
         }
