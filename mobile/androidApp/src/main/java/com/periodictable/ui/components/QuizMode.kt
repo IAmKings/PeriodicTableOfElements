@@ -290,19 +290,20 @@ fun QuizMode(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                // 根据题型隐藏对应答案，用问号替代
                 Text(
-                    text = question.element.atomicNumber.toString(),
+                    text = if (question.type == QuizType.ATOMIC_NUMBER) "?" else question.element.atomicNumber.toString(),
                     color = Color.White.copy(alpha = 0.7f),
                     fontSize = 12.sp
                 )
                 Text(
-                    text = question.element.symbol,
+                    text = if (question.type == QuizType.SYMBOL) "?" else question.element.symbol,
                     color = Color.White,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = question.element.nameZh,
+                    text = if (question.type == QuizType.NAME) "?" else question.element.nameZh,
                     color = Color.White.copy(alpha = 0.8f),
                     fontSize = 14.sp
                 )
