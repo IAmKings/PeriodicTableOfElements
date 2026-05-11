@@ -79,7 +79,7 @@ fun PeriodicGrid(
         Triple(gridData, rows, cols)
     }
 
-    val cellSize = 38 // 进一步减小单元格尺寸以容纳更多内容
+    val cellSize = 48 // 放大单元格尺寸，方便点击
     val gridWidth = cellSize * 18 + 24 // 18列 + 左侧序号宽度
 
     // PHASE 0 验证2: 外层单次横向 + 纵向滚动（移除9个Row各自的horizontalScroll）

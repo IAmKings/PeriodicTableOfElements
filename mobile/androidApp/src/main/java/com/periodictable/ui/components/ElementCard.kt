@@ -4,8 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,7 +46,7 @@ fun ElementCard(
             .size(cellSize.dp)
     ) {
 
-        Box(
+         Box(
             modifier = Modifier
                 .size(cellSize.dp)
                 .clip(RoundedCornerShape(6.dp))
@@ -64,34 +66,35 @@ fun ElementCard(
                 ) {
                     onClick(element)
                 }
-                .padding(3.dp)
+                .padding(start = 3.dp, top = 3.dp, end = 3.dp, bottom = 1.dp)
         ) {
+             // 序号 - 左上角
              Text(
                  text = element.atomicNumber.toString(),
                  color = Color.White.copy(alpha = 0.7f * alpha),
-                 fontSize = 7.sp,
+                 fontSize = 8.sp,
                  modifier = Modifier
                      .align(Alignment.TopStart)
-                     .offset(y = (-4).dp)
+                     .offset(y = (-2).dp)
                      .padding(start = 1.dp)
              )
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = element.symbol,
-                    color = Color.White.copy(alpha = alpha),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-                Text(
-                    text = element.nameZh,
-                    color = Color.White.copy(alpha = 0.8f * alpha),
-                    fontSize = 8.sp
-                )
-            }
+             // 元素符号 - 绝对居中（微上移给中文腾出空间）
+             Text(
+                 text = element.symbol,
+                 color = Color.White.copy(alpha = alpha),
+                 fontSize = 14.sp,
+                 fontWeight = FontWeight.Bold,
+                 modifier = Modifier
+                     .align(Alignment.Center)
+                     .offset(y = (-2).dp)
+             )
+             // 中文名称 - 底部居中
+             Text(
+                 text = element.nameZh,
+                 color = Color.White.copy(alpha = 0.8f * alpha),
+                 fontSize = 10.sp,
+                 modifier = Modifier.align(Alignment.BottomCenter)
+             )
         }
     }
 }
