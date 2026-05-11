@@ -3,6 +3,7 @@ package com.periodictable.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -109,7 +110,8 @@ fun PeriodicGrid(
         // 主表
         for (row in 0..6) {
             Row(
-                modifier = Modifier.padding(vertical = 1.dp)
+                modifier = Modifier.padding(vertical = 1.dp),
+                horizontalArrangement = Arrangement.spacedBy(1.dp)
             ) {
                 Box(
                     modifier = Modifier.size(24.dp, cellSize.dp),
@@ -153,7 +155,8 @@ fun PeriodicGrid(
         // 镧系和锕系
         for (row in 7..8) {
             Row(
-                modifier = Modifier.padding(vertical = 1.dp)
+                modifier = Modifier.padding(vertical = 1.dp),
+                horizontalArrangement = Arrangement.spacedBy(1.dp)
             ) {
                 Box(
                     modifier = Modifier.size(24.dp, cellSize.dp),
@@ -165,7 +168,7 @@ fun PeriodicGrid(
                         fontSize = 9.sp
                     )
                 }
-                Spacer(modifier = Modifier.size(cellSize.dp * 3))
+                Spacer(modifier = Modifier.width((cellSize * 3 + 2).dp))
                 for (col in 3..17) {
                     val element = grid[row][col]
                     if (element != null) {

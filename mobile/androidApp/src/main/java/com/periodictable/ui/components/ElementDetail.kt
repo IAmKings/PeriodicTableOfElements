@@ -52,6 +52,10 @@ import com.periodictable.data.Element
 import com.periodictable.data.categoryInfo
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -383,6 +387,15 @@ fun PropertyItem(
     value: String,
     modifier: Modifier = Modifier
 ) {
+    val labelText = buildAnnotatedString {
+        withStyle(SpanStyle(color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp)) {
+            append(labelZh)
+        }
+        withStyle(SpanStyle(color = Color.White.copy(alpha = 0.3f), fontSize = 12.sp)) {
+            append(" / $labelEn")
+        }
+    }
+
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
@@ -395,18 +408,7 @@ fun PropertyItem(
             .padding(12.dp)
     ) {
         Column {
-            Row {
-                Text(
-                    text = labelZh,
-                    color = Color.White.copy(alpha = 0.5f),
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = " / $labelEn",
-                    color = Color.White.copy(alpha = 0.3f),
-                    fontSize = 12.sp
-                )
-            }
+            Text(text = labelText)
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = value,
