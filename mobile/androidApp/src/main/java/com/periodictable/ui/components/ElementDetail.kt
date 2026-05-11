@@ -204,8 +204,9 @@ fun ElementDetail(
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Column(
+                                            modifier = Modifier.fillMaxSize(),
                                             horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                                            verticalArrangement = Arrangement.SpaceEvenly
                                         ) {
                                             Text(
                                                 text = element.atomicNumber.toString(),
